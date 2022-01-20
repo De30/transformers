@@ -22,7 +22,7 @@ from transformers import Wav2Vec2PhonemeCTCTokenizer
 from transformers.models.wav2vec2.tokenization_wav2vec2 import VOCAB_FILES_NAMES
 from transformers.testing_utils import require_phonemizer
 
-from .test_tokenization_common import TokenizerTesterMixin
+from ..test_tokenization_common import TokenizerTesterMixin
 
 
 @require_phonemizer

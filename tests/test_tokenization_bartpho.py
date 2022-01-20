@@ -18,7 +18,7 @@ import unittest
 
 from transformers.models.bartpho.tokenization_bartpho import VOCAB_FILES_NAMES, BartphoTokenizer
 
-from .test_tokenization_common import TokenizerTesterMixin
+from ..test_tokenization_common import TokenizerTesterMixin
 
 
 SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece_bpe.model")
