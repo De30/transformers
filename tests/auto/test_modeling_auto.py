@@ -28,7 +28,7 @@ from transformers.testing_utils import (
     slow,
 )
 
-from .test_modeling_bert import BertModelTester
+from ..bert.test_modeling_bert import BertModelTester
 
 
 if is_torch_available():
