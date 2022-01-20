@@ -60,7 +60,7 @@ jobs:
         run: echo "${{ matrix.folders }}"
 
       - name: Run all non-slow tests on GPU
-        run: python -m pytest --dist=loadfile -v --make-reports=tests_torch_gpu_${{ matrix.folders }} ${{ matrix.folders }} -k config
+        run: python -m pytest -v --make-reports=tests_torch_gpu_${{ matrix.folders }} ${{ matrix.folders }} -k config
 
       - name: Failure short reports
         if: ${{ failure() }}
