@@ -21,7 +21,7 @@ from transformers import MarianConfig, is_flax_available
 from transformers.file_utils import cached_property
 from transformers.testing_utils import require_flax, require_sentencepiece, require_tokenizers, slow
 
-from .test_generation_flax_utils import FlaxGenerationTesterMixin
+from ..test_generation_flax_utils import FlaxGenerationTesterMixin
 from ..test_modeling_flax_common import FlaxModelTesterMixin, ids_tensor
 
 

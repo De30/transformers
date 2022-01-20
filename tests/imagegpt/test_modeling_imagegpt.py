@@ -25,7 +25,7 @@ from transformers.file_utils import cached_property, is_torch_available, is_visi
 from transformers.testing_utils import require_torch, require_vision, slow, torch_device
 
 from ..test_configuration_common import ConfigTester
-from .test_generation_utils import GenerationTesterMixin
+from ..test_generation_utils import GenerationTesterMixin
 from ..test_modeling_common import ModelTesterMixin, _config_zero_init, floats_tensor, ids_tensor, random_attention_mask
 
 

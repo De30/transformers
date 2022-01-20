@@ -21,7 +21,7 @@ from transformers import TransfoXLConfig, is_torch_available
 from transformers.testing_utils import require_torch, require_torch_multi_gpu, slow, torch_device
 
 from ..test_configuration_common import ConfigTester
-from .test_generation_utils import GenerationTesterMixin
+from ..test_generation_utils import GenerationTesterMixin
 from ..test_modeling_common import ModelTesterMixin, ids_tensor
 
 
