@@ -60,10 +60,12 @@ jobs:
         run: echo "${{ matrix.folders }}"
 
       - name: Run all non-slow tests on GPU
-        run: python -m pytest -v --make-reports=tests_torch_gpu_${{ matrix.folders }} ${{ matrix.folders }} -k config
+        continue-on-error: true
+        run: python -m pytest -v --make-reports=tests_torch_gpu_${{ matrix.folders }} tests/${{ matrix.folders }} -k config
 
       - name: Failure short reports
         if: ${{ failure() }}
+        continue-on-error: true
         run: cat reports/tests_torch_gpu_${{ matrix.folders }}_failures_short.txt
 
       - name: Test suite reports artifacts
