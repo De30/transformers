@@ -46,7 +46,7 @@ jobs:
   run_tests_torch_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
-      image: huggingface/doc-builder-transformers
+      image: huggingface/pytoch-latest-release-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     needs: list-test-folders
     strategy:
