@@ -26,7 +26,7 @@ jobs:
   list-test-folders:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
-      image: huggingface/pytorch-latest-release-gpu
+      image: huggingface/pt-tf-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -45,11 +45,13 @@ jobs:
       - name: Are GPUs recognized by our DL frameworks
         run: |
           utils/print_env_pt.py
+          TF_CPP_MIN_LOG_LEVEL=3 python -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
+          TF_CPP_MIN_LOG_LEVEL=3 python -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
 
   run_tests_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
-      image: huggingface/pytorch-latest-release-gpu
+      image: huggingface/pt-tf-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     needs: list-test-folders
     strategy:
