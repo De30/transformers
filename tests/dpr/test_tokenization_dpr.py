@@ -26,7 +26,7 @@ from transformers import (
 from transformers.testing_utils import require_tokenizers, slow
 from transformers.tokenization_utils_base import BatchEncoding
 
-from .test_tokenization_bert import BertTokenizationTest
+from ..bert.test_tokenization_bert import BertTokenizationTest
 
 
 @require_tokenizers

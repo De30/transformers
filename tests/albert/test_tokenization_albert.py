@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import unittest
 
 from transformers import AlbertTokenizer, AlbertTokenizerFast
@@ -22,7 +23,7 @@ from transformers.testing_utils import require_sentencepiece, require_tokenizers
 from ..test_tokenization_common import TokenizerTesterMixin
 
 
-SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/spiece.model")
+SAMPLE_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/spiece.model")
 
 
 @require_sentencepiece

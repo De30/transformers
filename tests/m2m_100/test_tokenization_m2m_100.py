@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import tempfile
 import unittest
 from pathlib import Path
@@ -30,7 +31,7 @@ from ..test_tokenization_common import TokenizerTesterMixin
 
 
 if is_sentencepiece_available():
-    SAMPLE_SP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
+    SAMPLE_SP = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 
 
 if is_torch_available():

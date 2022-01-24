@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import shutil
 import tempfile
 import unittest
@@ -31,7 +32,7 @@ if is_speech_available():
     from transformers import Speech2TextFeatureExtractor, Speech2TextProcessor
 
 
-SAMPLE_SP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
+SAMPLE_SP = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 
 
 @require_torch

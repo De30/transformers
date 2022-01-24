@@ -16,7 +16,7 @@
 from transformers.models.cpm.tokenization_cpm import CpmTokenizer
 from transformers.testing_utils import custom_tokenizers
 
-from .test_modeling_xlnet import XLNetModelTest
+from ..xlnet.test_modeling_xlnet import XLNetModelTest
 
 
 @custom_tokenizers

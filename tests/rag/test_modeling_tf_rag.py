@@ -34,8 +34,8 @@ if is_tf_available() and is_datasets_available() and is_faiss_available():
 
     from transformers.modeling_tf_outputs import TFBaseModelOutput
 
-from .test_modeling_tf_bart import TFBartModelTester
-from .test_modeling_tf_dpr import TFDPRModelTester
+from ..bart.test_modeling_tf_bart import TFBartModelTester
+from ..dpr.test_modeling_tf_dpr import TFDPRModelTester
 
 
 TOLERANCE = 1e-3

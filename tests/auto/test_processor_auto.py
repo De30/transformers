@@ -15,6 +15,7 @@
 
 import json
 import os
+from os.path import dirname
 import tempfile
 import unittest
 from shutil import copyfile
@@ -25,9 +26,9 @@ from transformers.tokenization_utils import TOKENIZER_CONFIG_FILE
 
 
 SAMPLE_PROCESSOR_CONFIG = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "fixtures/dummy_feature_extractor_config.json"
+    dirname(dirname(os.path.abspath(__file__))), "fixtures/dummy_feature_extractor_config.json"
 )
-SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/vocab.json")
+SAMPLE_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/vocab.json")
 
 
 class AutoFeatureExtractorTest(unittest.TestCase):

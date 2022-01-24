@@ -14,6 +14,7 @@
 
 
 import os
+from os.path import dirname
 import unittest
 
 from transformers.models.bartpho.tokenization_bartpho import VOCAB_FILES_NAMES, BartphoTokenizer
@@ -21,7 +22,7 @@ from transformers.models.bartpho.tokenization_bartpho import VOCAB_FILES_NAMES, 
 from ..test_tokenization_common import TokenizerTesterMixin
 
 
-SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece_bpe.model")
+SAMPLE_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece_bpe.model")
 
 
 class BartphoTokenizerTest(TokenizerTesterMixin, unittest.TestCase):

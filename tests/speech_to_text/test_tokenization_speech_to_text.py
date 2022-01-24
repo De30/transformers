@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import unittest
 from pathlib import Path
 from shutil import copyfile
@@ -25,7 +26,7 @@ from transformers.testing_utils import require_sentencepiece, require_tokenizers
 from ..test_tokenization_common import TokenizerTesterMixin
 
 
-SAMPLE_SP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
+SAMPLE_SP = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 
 if is_sentencepiece_available():
     import sentencepiece as sp

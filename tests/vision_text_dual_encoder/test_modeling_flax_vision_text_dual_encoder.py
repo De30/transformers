@@ -31,10 +31,10 @@ from transformers.testing_utils import (
     torch_device,
 )
 
-from .test_modeling_flax_bert import FlaxBertModelTester
-from .test_modeling_flax_clip import FlaxCLIPVisionModelTester
+from ..bert.test_modeling_flax_bert import FlaxBertModelTester
+from ..clip.test_modeling_flax_clip import FlaxCLIPVisionModelTester
 from ..test_modeling_flax_common import floats_tensor, ids_tensor, random_attention_mask
-from .test_modeling_flax_vit import FlaxViTModelTester
+from ..vit.test_modeling_flax_vit import FlaxViTModelTester
 
 
 if is_flax_available():

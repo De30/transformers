@@ -46,7 +46,7 @@ jobs:
         run: |
           utils/print_env_pt.py
 
-  run_tests_torch_gpu:
+  run_tests_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/pytorch-latest-release-gpu
@@ -61,16 +61,16 @@ jobs:
 
       - name: Run all non-slow tests on GPU
         continue-on-error: true
-        run: python -m pytest -v --make-reports=tests_torch_gpu_${{ matrix.folders }} tests/${{ matrix.folders }} -k config
+        run: python -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
 
       - name: Failure short reports
         if: ${{ failure() }}
         continue-on-error: true
-        run: cat reports/tests_torch_gpu_${{ matrix.folders }}_failures_short.txt
+        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: run_all_tests_torch_gpu_${{ matrix.folders }}_test_reports
+          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
           path: reports

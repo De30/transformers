@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import tempfile
 import unittest
 from pathlib import Path
@@ -30,7 +31,7 @@ if is_sentencepiece_available():
 from ..test_tokenization_common import TokenizerTesterMixin
 
 
-SAMPLE_SP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
+SAMPLE_SP = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 
 mock_tokenizer_config = {"target_lang": "fi", "source_lang": "en"}
 zh_code = ">>zh<<"

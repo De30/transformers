@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import tempfile
 import unittest
 
@@ -23,7 +24,7 @@ from transformers.models.roberta.configuration_roberta import RobertaConfig
 from transformers.testing_utils import DUMMY_UNKNOWN_IDENTIFIER
 
 
-SAMPLE_ROBERTA_CONFIG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/dummy-config.json")
+SAMPLE_ROBERTA_CONFIG = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/dummy-config.json")
 
 
 class NewModelConfig(BertConfig):

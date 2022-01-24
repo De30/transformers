@@ -15,17 +15,18 @@
 
 import json
 import os
+from os.path import dirname
 import tempfile
 import unittest
 
 from transformers import AutoFeatureExtractor, Wav2Vec2Config, Wav2Vec2FeatureExtractor
 
 
-SAMPLE_FEATURE_EXTRACTION_CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+SAMPLE_FEATURE_EXTRACTION_CONFIG_DIR = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures")
 SAMPLE_FEATURE_EXTRACTION_CONFIG = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "fixtures/dummy_feature_extractor_config.json"
+    dirname(dirname(os.path.abspath(__file__))), "fixtures/dummy_feature_extractor_config.json"
 )
-SAMPLE_CONFIG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/dummy-config.json")
+SAMPLE_CONFIG = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/dummy-config.json")
 
 
 class AutoFeatureExtractorTest(unittest.TestCase):

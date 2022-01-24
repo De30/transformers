@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import unittest
 from typing import Tuple
 
@@ -23,9 +24,9 @@ from transformers.testing_utils import require_torch, slow
 from ..test_tokenization_common import TokenizerTesterMixin
 
 
-SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/vocab.json")
-SAMPLE_MERGE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/merges.txt")
-SAMPLE_ENTITY_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_entity_vocab.json")
+SAMPLE_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/vocab.json")
+SAMPLE_MERGE_FILE = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/merges.txt")
+SAMPLE_ENTITY_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_entity_vocab.json")
 
 
 class LukeTokenizerTest(TokenizerTesterMixin, unittest.TestCase):

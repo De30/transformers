@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import shutil
 import tempfile
 import unittest
@@ -23,8 +24,7 @@ from transformers.testing_utils import nested_simplify, require_sentencepiece, r
 from ..test_tokenization_common import TokenizerTesterMixin
 
 
-SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
-
+SAMPLE_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 
 if is_torch_available():
     from transformers.models.mbart.modeling_mbart import shift_tokens_right

@@ -19,7 +19,7 @@ import unittest
 from transformers import PegasusConfig, PegasusTokenizer, is_flax_available
 from transformers.testing_utils import require_flax, slow
 
-from .test_configuration_common import ConfigTester
+from ..test_configuration_common import ConfigTester
 from ..test_modeling_flax_common import FlaxModelTesterMixin, ids_tensor
 
 

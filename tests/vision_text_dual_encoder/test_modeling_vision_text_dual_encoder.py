@@ -24,12 +24,12 @@ import numpy as np
 from transformers.file_utils import is_flax_available, is_torch_available, is_vision_available
 from transformers.testing_utils import is_pt_flax_cross_test, require_torch, require_vision, slow, torch_device
 
-from .test_modeling_bert import BertModelTester
-from .test_modeling_clip import CLIPVisionModelTester
+from ..bert.test_modeling_bert import BertModelTester
+from ..clip.test_modeling_clip import CLIPVisionModelTester
 from ..test_modeling_common import floats_tensor, ids_tensor, random_attention_mask
-from .test_modeling_deit import DeiTModelTester
-from .test_modeling_roberta import RobertaModelTester
-from .test_modeling_vit import ViTModelTester
+from ..deit.test_modeling_deit import DeiTModelTester
+from ..roberta.test_modeling_roberta import RobertaModelTester
+from ..vit.test_modeling_vit import ViTModelTester
 
 
 if is_torch_available():

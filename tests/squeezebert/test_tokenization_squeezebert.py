@@ -17,7 +17,7 @@
 from transformers import SqueezeBertTokenizer, SqueezeBertTokenizerFast
 from transformers.testing_utils import require_tokenizers, slow
 
-from .test_tokenization_bert import BertTokenizationTest
+from ..bert.test_tokenization_bert import BertTokenizationTest
 
 
 @require_tokenizers

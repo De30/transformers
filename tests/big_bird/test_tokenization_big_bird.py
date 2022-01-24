@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+from os.path import dirname
 import unittest
 
 from transformers import BigBirdTokenizer, BigBirdTokenizerFast
@@ -25,7 +26,7 @@ from ..test_tokenization_common import TokenizerTesterMixin
 
 SPIECE_UNDERLINE = "▁"
 
-SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
+SAMPLE_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 
 
 @require_sentencepiece

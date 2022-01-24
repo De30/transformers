@@ -16,6 +16,7 @@
 
 import json
 import os
+from os.path import dirname
 import shutil
 import tempfile
 import unittest
@@ -37,15 +38,14 @@ from transformers.testing_utils import (
     torch_device,
 )
 
-from .test_modeling_bart import BartModelTester
-from .test_modeling_dpr import DPRModelTester
-from .test_modeling_t5 import T5ModelTester
+from ..bart.test_modeling_bart import BartModelTester
+from ..dpr.test_modeling_dpr import DPRModelTester
+from ..t5.test_modeling_t5 import T5ModelTester
 
 
 TOLERANCE = 1e-3
 
-T5_SAMPLE_VOCAB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
-
+T5_SAMPLE_VOCAB = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 if is_torch_available() and is_datasets_available() and is_faiss_available():
     import torch
     from datasets import Dataset

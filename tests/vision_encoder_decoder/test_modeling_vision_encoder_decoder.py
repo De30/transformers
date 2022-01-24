@@ -22,11 +22,11 @@ from datasets import load_dataset
 from transformers.file_utils import cached_property, is_torch_available, is_vision_available
 from transformers.testing_utils import require_torch, require_vision, slow, torch_device
 
-from .test_modeling_bert import BertModelTester
+from ..bert.test_modeling_bert import BertModelTester
 from ..test_modeling_common import floats_tensor, ids_tensor, random_attention_mask
-from .test_modeling_deit import DeiTModelTester
-from .test_modeling_trocr import TrOCRStandaloneDecoderModelTester
-from .test_modeling_vit import ViTModelTester
+from ..deit.test_modeling_deit import DeiTModelTester
+from ..trocr.test_modeling_trocr import TrOCRStandaloneDecoderModelTester
+from ..vit.test_modeling_vit import ViTModelTester
 
 
 if is_torch_available():

@@ -32,8 +32,8 @@ from transformers.testing_utils import (
 )
 
 from ..test_modeling_tf_common import floats_tensor, ids_tensor
-from .test_modeling_tf_gpt2 import TFGPT2ModelTester
-from .test_modeling_tf_vit import TFViTModelTester
+from ..gpt2.test_modeling_tf_gpt2 import TFGPT2ModelTester
+from ..vit.test_modeling_tf_vit import TFViTModelTester
 
 
 if is_tf_available():

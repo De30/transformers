@@ -14,6 +14,7 @@
 
 import json
 import os
+from os.path import dirname
 import shutil
 import tempfile
 import unittest
@@ -37,7 +38,7 @@ if is_pytesseract_available():
     from transformers import LayoutLMv2FeatureExtractor, LayoutXLMProcessor
 
 
-SAMPLE_SP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures/test_sentencepiece.model")
+SAMPLE_SP = os.path.join(dirname(dirname(os.path.abspath(__file__))), "fixtures/test_sentencepiece.model")
 
 
 @require_pytesseract

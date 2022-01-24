@@ -26,7 +26,13 @@ from transformers.testing_utils import require_torch, require_vision, slow, torc
 
 from ..test_configuration_common import ConfigTester
 from ..test_generation_utils import GenerationTesterMixin
-from ..test_modeling_common import ModelTesterMixin, _config_zero_init, floats_tensor, ids_tensor, random_attention_mask
+from ..test_modeling_common import (
+    ModelTesterMixin,
+    _config_zero_init,
+    floats_tensor,
+    ids_tensor,
+    random_attention_mask,
+)
 
 
 if is_torch_available():
