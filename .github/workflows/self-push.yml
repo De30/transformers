@@ -21,6 +21,7 @@ env:
   OMP_NUM_THREADS: 8
   MKL_NUM_THREADS: 8
   PYTEST_TIMEOUT: 60
+  RUN_SLOW: yes
 
 jobs:
   list-test-folders:
