@@ -72,7 +72,7 @@ jobs:
         run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
 
       - name: Test suite reports artifacts
-        if: ${{ always() }}
+        if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
           name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
