@@ -37,7 +37,7 @@ jobs:
 
       - id: set-matrix
         working-directory: tests
-        run: echo "::set-output name=matrix::$(python3 -c 'import os; print(list(filter(os.path.isdir, os.listdir(os.getcwd())))[:3])')"
+        run: echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:3]')"
 
       - name: NVIDIA-SMI
         run: |
@@ -98,4 +98,4 @@ jobs:
 
         run: |
           pip install slack_sdk
-          python utils/notification_service.py ${{ fromjson(needs.list-test-folders.outputs.matrix) }}
+          python utils/notification_service.py ${{ fromJson(needs.list-test-folders.outputs.matrix) }}
