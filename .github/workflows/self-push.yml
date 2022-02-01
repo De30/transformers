@@ -27,7 +27,7 @@ jobs:
   list-test-folders:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
-      image: huggingface/pt-tf-gpu
+      image: huggingface/
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
