@@ -114,6 +114,8 @@ if __name__ == "__main__":
 
     print(models)
 
+    print(os.listdir('.'))
+
     for model in models:
         files = os.listdir(f'run_all_tests_gpu_{model}_test_reports')
         print(files)
