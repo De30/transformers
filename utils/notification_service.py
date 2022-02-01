@@ -107,7 +107,8 @@ def format_for_slack(total_results, results, scheduled: bool, title: str):
 
 if __name__ == "__main__":
     arguments = sys.argv[1:]
-    models = json.loads(arguments[0])
+    print(arguments)
 
+    models = json.loads(arguments[0])
 
     print(models)
