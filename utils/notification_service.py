@@ -106,12 +106,9 @@ def format_for_slack(total_results, results, scheduled: bool, title: str):
 
 
 if __name__ == "__main__":
-    arguments = "".join(sys.argv[1:])
-    print(arguments)
+    arguments = sys.argv[1:]
 
-    models = json.loads(arguments)
-
-    print(models)
+    models = arguments[0]
 
     for model in models:
         files = os.listdir(f'run_all_tests_gpu_{model}_test_reports')
