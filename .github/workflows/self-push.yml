@@ -67,7 +67,7 @@ jobs:
 
         run: |
           pip install slack_sdk
-          python utils/notification_service.py ${{ fromJson(needs.list-test-folders.outputs.matrix) }}
+          python utils/notification_service.py
 #
 #  run_tests_gpu:
 #    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
