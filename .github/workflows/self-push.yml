@@ -53,6 +53,7 @@ jobs:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
+    needs: list-test-folders
     steps:
       - uses: actions/checkout@v2
 
@@ -67,7 +68,7 @@ jobs:
 
         run: |
           pip install slack_sdk
-          python utils/notification_service.py
+          python utils/notification_service.py ${{ needs.list-test-folders.outputs.matrix }}
 #
 #  run_tests_gpu:
 #    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
