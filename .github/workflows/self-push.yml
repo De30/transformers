@@ -37,7 +37,7 @@ jobs:
 
       - id: set-matrix
         working-directory: tests
-        run: echo "::set-output name=matrix::$(python3 -c 'import os; print(list(filter(os.path.isdir, os.listdir(os.getcwd()))))')"
+        run: echo "::set-output name=matrix::$(python3 -c 'import os; print(list(filter(os.path.isdir, os.listdir(os.getcwd())))[:3])')"
 
       - name: NVIDIA-SMI
         run: |
@@ -77,3 +77,25 @@ jobs:
         with:
           name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
           path: reports
+
+  send_results:
+    name: Send results to webhook
+    runs-on: ubuntu-latest
+    needs: run_tests_gpu
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+
+      - name: Send message to Slack
+        env:
+          CI_SLACK_BOT_TOKEN: ${{ secrets.CI_SLACK_BOT_TOKEN }}
+          CI_SLACK_CHANNEL_ID: ${{ secrets.CI_SLACK_CHANNEL_ID }}
+          CI_SLACK_CHANNEL_ID_DAILY: ${{ secrets.CI_SLACK_CHANNEL_ID_DAILY }}
+
+
+        run: |
+          pip install slack_sdk
+          python utils/notification_service.py ${{ fromjson(needs.list-test-folders.outputs.matrix) }}
