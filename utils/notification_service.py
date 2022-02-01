@@ -15,6 +15,7 @@
 import os
 import re
 import sys
+import json
 
 from slack_sdk import WebClient
 
@@ -106,5 +107,7 @@ def format_for_slack(total_results, results, scheduled: bool, title: str):
 
 if __name__ == "__main__":
     arguments = sys.argv[1:]
+    models = json.loads(arguments[0])
 
-    print(arguments)
+
+    print(models)

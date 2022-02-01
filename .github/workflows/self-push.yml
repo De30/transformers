@@ -37,7 +37,7 @@ jobs:
 
       - id: set-matrix
         working-directory: tests
-        run: echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:3])')"
+        run: echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:2])')"
 
       - name: NVIDIA-SMI
         run: |
@@ -49,52 +49,47 @@ jobs:
           TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
           TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
 
+  run_tests_gpu:
+    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    container:
+      image: huggingface/pt-tf-gpu
+      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    needs: list-test-folders
+    strategy:
+      matrix:
+        folders: ${{ fromJson(needs.list-test-folders.outputs.matrix) }}
+    steps:
+      - name: Echo folder ${{ matrix.folders }}
+        run: echo "${{ matrix.folders }}"
+
+      - name: Run all non-slow tests on GPU
+        run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
+
+      - name: Failure short reports
+        if: ${{ failure() }}
+        continue-on-error: true
+        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
+
+      - name: Test suite reports artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
+          path: reports
+
   send_results:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
-    needs: list-test-folders
+    needs: [list-test-folders, run_tests_gpu]
     steps:
       - uses: actions/checkout@v2
-
       - uses: actions/download-artifact@v2
-
       - name: Send message to Slack
         env:
           CI_SLACK_BOT_TOKEN: ${{ secrets.CI_SLACK_BOT_TOKEN }}
           CI_SLACK_CHANNEL_ID: ${{ secrets.CI_SLACK_CHANNEL_ID }}
           CI_SLACK_CHANNEL_ID_DAILY: ${{ secrets.CI_SLACK_CHANNEL_ID_DAILY }}
-
-
         run: |
           pip install slack_sdk
           python utils/notification_service.py ${{ needs.list-test-folders.outputs.matrix }}
-#
-#  run_tests_gpu:
-#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-#    container:
-#      image: huggingface/pt-tf-gpu
-#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-#    needs: list-test-folders
-#    strategy:
-#      matrix:
-#        folders: ${{ fromJson(needs.list-test-folders.outputs.matrix) }}
-#    steps:
-#      - name: Echo folder ${{ matrix.folders }}
-#        run: echo "${{ matrix.folders }}"
-#
-#      - name: Run all non-slow tests on GPU
-#        run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
-#
-#      - name: Failure short reports
-#        if: ${{ failure() }}
-#        continue-on-error: true
-#        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
-#
-#      - name: Test suite reports artifacts
-#        if: ${{ failure() }}
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
-#          path: reports
-#
