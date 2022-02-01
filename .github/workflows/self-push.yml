@@ -37,7 +37,7 @@ jobs:
 
       - id: set-matrix
         working-directory: tests
-        run: echo "::set-output name=matrix::$(python -c 'import os; print(list(filter(os.path.isdir, os.listdir(os.getcwd()))))')"
+        run: echo "::set-output name=matrix::$(python3 -c 'import os; print(list(filter(os.path.isdir, os.listdir(os.getcwd()))))')"
 
       - name: NVIDIA-SMI
         run: |
@@ -46,8 +46,8 @@ jobs:
       - name: Are GPUs recognized by our DL frameworks
         run: |
           utils/print_env_pt.py
-          TF_CPP_MIN_LOG_LEVEL=3 python -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
-          TF_CPP_MIN_LOG_LEVEL=3 python -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
+          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
+          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
 
   run_tests_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
@@ -64,7 +64,7 @@ jobs:
 
       - name: Run all non-slow tests on GPU
         continue-on-error: true
-        run: python -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
+        run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
 
       - name: Failure short reports
         if: ${{ failure() }}
