@@ -59,6 +59,7 @@ jobs:
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     needs: list-test-folders
     strategy:
+      fail-fast: false
       matrix:
         folders: ${{ fromJson(needs.list-test-folders.outputs.matrix) }}
     steps:
