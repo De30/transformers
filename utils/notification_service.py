@@ -17,7 +17,7 @@ import re
 import sys
 import json
 
-from slack_sdk import WebClient
+# from slack_sdk import WebClient
 
 
 def handle_test_results(test_results):
@@ -116,9 +116,36 @@ if __name__ == "__main__":
 
     print(os.listdir('.'))
 
+    results = {}
+    framework_related_failures = {
+        "pt": 0,
+        "tf": 0,
+        "flax": 0
+    }
     for model in models:
-        files = os.listdir(f'run_all_tests_gpu_{model}_test_reports')
-        print(files)
+        if os.path.exists(f'run_all_tests_gpu_{model}_test_reports'):
+            results[model] = {"failed": 0, "success": 0, "time_spent": "", "failures": ""}
+            files = os.listdir(f'run_all_tests_gpu_{model}_test_reports')
 
-        with open(os.path.join(files, "tests_gpu_bart_stats.txt")) as f:
-            print(f.read())
+            with open(os.path.join(f"run_all_tests_gpu_{model}_test_reports", f"tests_gpu_{model}_stats.txt")) as f:
+                failed, success, time_spent = handle_test_results(f.read())
+                results[model]["failed"] += failed
+                results[model]["success"] += success
+                results[model]["time_spent"] += time_spent[1:-1] + ", "
+            with open(os.path.join(f"run_all_tests_gpu_{model}_test_reports", f"tests_gpu_{model}_summary_short.txt")) as f:
+                for line in f:
+                    if re.search("FAILED", line):
+                        results[model]["failures"] += line
+                        if re.search('test_modeling', line):
+                            if re.search("_tf_", line):
+                                framework_related_failures['tf'] += 1
+                            elif re.search("_flax_", line):
+                                framework_related_failures['flax'] += 1
+                            else:
+                                framework_related_failures['pt'] += 1
+
+
+
+
+    print(results)
+    print(framework_related_failures)
