@@ -24,7 +24,7 @@ env:
   RUN_SLOW: yes
 
 jobs:
-  list-test-folders:
+  identify_models:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/transformers-all-latest-gpu
@@ -38,7 +38,7 @@ jobs:
       - id: set-matrix
         working-directory: tests
         run: |
-          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove('deepspeed'); x.remove('pipelines'); x.remove('extended'); print(x[:5])')"
+          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove('deepspeed'); x.remove('pipelines'); x.remove('extended'); print(x)')"
         
 
       - name: NVIDIA-SMI
@@ -58,11 +58,11 @@ jobs:
     container:
       image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: list-test-folders
+    needs: identify_models
     strategy:
       fail-fast: false
       matrix:
-        folders: ${{ fromJson(needs.list-test-folders.outputs.matrix) }}
+        folders: ${{ fromJson(needs.identify_models.outputs.matrix) }}
     steps:
       - name: Echo folder ${{ matrix.folders }}
         run: echo "${{ matrix.folders }}"
@@ -87,7 +87,7 @@ jobs:
     container:
       image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: list-test-folders
+    needs: identify_models
     steps:
       - name: Run examples tests on GPU
         if: ${{ always() }}
@@ -102,25 +102,25 @@ jobs:
           name: run_all_examples_gpu_test_reports
           path: reports/examples_torch_gpu
 
-  run_pipelines_gpu:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: list-test-folders
-    steps:
-      - name: Run all pipeline tests on GPU
-        env:
-          RUN_PIPELINE_TESTS: yes
-        run: |
-          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_torch_pipeline_gpu tests
-
-      - name: Test suite reports artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: run_all_tests_pipeline_gpu_test_reports
-          path: reports/tests_torch_pipeline_gpu
+#  run_pipelines_gpu:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-all-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    needs: identify_models
+#    steps:
+#      - name: Run all pipeline tests on GPU
+#        env:
+#          RUN_PIPELINE_TESTS: yes
+#        run: |
+#          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_torch_pipeline_gpu tests
+#
+#      - name: Test suite reports artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: run_all_tests_pipeline_gpu_test_reports
+#          path: reports/tests_torch_pipeline_gpu
 
   run_all_tests_torch_cuda_extensions_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
@@ -146,7 +146,7 @@ jobs:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
-    needs: [list-test-folders, run_tests_gpu, run_examples_gpu, run_pipelines_gpu]
+    needs: [identify_models, run_tests_gpu, run_examples_gpu, run_all_tests_torch_cuda_extensions_gpu]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
@@ -158,4 +158,4 @@ jobs:
           CI_SLACK_CHANNEL_DUMMY_TESTS: ${{ secrets.CI_SLACK_CHANNEL_DUMMY_TESTS }}
         run: |
           pip install slack_sdk
-          python utils/notification_service.py "${{ needs.list-test-folders.outputs.matrix }}"
+          python utils/notification_service.py "${{ needs.identify_models.outputs.matrix }}"
