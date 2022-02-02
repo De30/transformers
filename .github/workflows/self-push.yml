@@ -139,6 +139,9 @@ jobs:
       - name: Update clone
         run: cd /workspace/transformers && git fetch && git checkout  ${{ github.sha }}
 
+      - name: GCC version
+        run: gcc --version
+
       - name: Run all tests on GPU
         working-directory: /workspace/transformers
         run: |
