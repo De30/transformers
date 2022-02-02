@@ -91,7 +91,7 @@ jobs:
         if: ${{ always() }}
         run: |
           pip install -r examples/pytorch/_tests_requirements.txt
-          python -m pytest -n 1 -v --dist=loadfile --make-reports=examples_torch_gpu examples
+          python3 -m pytest -n 1 -v --dist=loadfile --make-reports=examples_torch_gpu examples
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
@@ -111,7 +111,7 @@ jobs:
         env:
           RUN_PIPELINE_TESTS: yes
         run: |
-          python -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_torch_pipeline_gpu tests
+          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_torch_pipeline_gpu tests
 
       - name: Test suite reports artifacts
         if: ${{ always() }}

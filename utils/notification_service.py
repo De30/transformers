@@ -164,6 +164,8 @@ class Message:
         return json.dumps(blocks)
 
     def post(self):
+        print("Sending the following payload")
+        print(self.payload)
         self.thread_ts = client.chat_postMessage(
             channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
             blocks=self.payload,
@@ -176,6 +178,8 @@ class Message:
 
         for job, job_result in results.items():
             if len(job_result["failures"]):
+                print("Sending the following reply")
+                print(f"{job}\n{job_result['failures']}")
                 client.chat_postMessage(
                     channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
                     text=f"{job}\n{job_result['failures']}",
@@ -258,8 +262,6 @@ if __name__ == "__main__":
         category_failures={k: v for k, v in failure_categories.items() if v > 0},
         results=results
     )
-
-    print(message.payload)
 
     message.post()
     message.post_reply()
