@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime
+FROM nvcr.io/nvidia/pytorch:21.03-py3
 LABEL maintainer="Hugging Face"
 
 RUN apt update

@@ -67,6 +67,9 @@ jobs:
       - name: Echo folder ${{ matrix.folders }}
         run: echo "${{ matrix.folders }}"
 
+      - name: Update repo
+        run: git pull
+
       - name: Run all non-slow tests on GPU
         run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
 
@@ -89,11 +92,13 @@ jobs:
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     needs: identify_models
     steps:
+      - name: Update repo
+        run: git pull
+
       - name: Run examples tests on GPU
-        if: ${{ always() }}
         run: |
           pip install -r examples/pytorch/_tests_requirements.txt
-          python3 -m pytest -n 1 -v --dist=loadfile --make-reports=examples_torch_gpu examples
+          python3 -m pytest -v --make-reports=examples_torch_gpu examples
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
@@ -109,6 +114,9 @@ jobs:
 #      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
 #    needs: identify_models
 #    steps:
+#      - name: Update repo
+#        run: git pull
+#
 #      - name: Run all pipeline tests on GPU
 #        env:
 #          RUN_PIPELINE_TESTS: yes
@@ -128,8 +136,8 @@ jobs:
       image: huggingface/transformers-pytorch-latest-release-deepspeed-gpu
       options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     steps:
-      - name: Launcher docker
-        uses: actions/checkout@v2
+      - name: Update repo
+        run: git pull
 
       - name: Run all tests on GPU
         run: |
