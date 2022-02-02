@@ -161,13 +161,13 @@ class Message:
         else:
             blocks.append(self.no_failures)
 
-        return json.dumps({"blocks": blocks})
-
+        return json.dumps(blocks)
 
     def post(self):
         self.thread_ts = client.chat_postMessage(
             channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
             blocks=self.payload,
+            text=f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
         )
 
     def post_reply(self):
@@ -179,7 +179,7 @@ class Message:
                 client.chat_postMessage(
                     channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
                     text=f"{job}\n{job_result['failures']}",
-                    thread_ts=self.thread_ts
+                    thread_ts=self.thread_ts["ts"]
                 )
 
 
