@@ -54,7 +54,7 @@ jobs:
   run_tests_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
-      image: huggingface/pt-tf-gpu
+      image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     needs: list-test-folders
     strategy:
@@ -80,11 +80,51 @@ jobs:
           name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
           path: reports/tests_gpu_${{ matrix.folders }}
 
+  run_examples_gpu:
+    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    container:
+      image: huggingface/transformers-all-latest-gpu
+      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    needs: list-test-folders
+    steps:
+      - name: Run examples tests on GPU
+        if: ${{ always() }}
+        run: |
+          pip install -r examples/pytorch/_tests_requirements.txt
+          python -m pytest -n 1 -v --dist=loadfile --make-reports=examples_torch_gpu examples
+
+      - name: Test suite reports artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: run_all_examples_gpu_test_reports
+          path: reports/examples_torch_gpu
+
+  run_pipelines_gpu:
+    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    container:
+      image: huggingface/transformers-all-latest-gpu
+      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    needs: list-test-folders
+    steps:
+      - name: Run all pipeline tests on GPU
+        env:
+          RUN_PIPELINE_TESTS: yes
+        run: |
+          python -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_torch_pipeline_gpu tests
+
+      - name: Test suite reports artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: run_all_tests_pipeline_gpu_test_reports
+          path: reports/tests_torch_pipeline_gpu
+
   send_results:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
-    needs: [list-test-folders, run_tests_gpu]
+    needs: [list-test-folders, run_tests_gpu, run_examples_gpu]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2

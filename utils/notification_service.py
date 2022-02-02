@@ -246,7 +246,12 @@ if __name__ == "__main__":
                         else:
                             failure_categories['Unclassified'] += 1
                             unclassified_failures.append(line)
-    
+
+    # Examples
+
+    # Pipelines
+
+
     message = Message(
         title="🤗 Results of the scheduled tests.",
         module_failures=module_failures,
