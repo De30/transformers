@@ -24,88 +24,88 @@ env:
   RUN_SLOW: yes
 
 jobs:
-  identify_models:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Launcher docker
-        uses: actions/checkout@v2
-
-      - id: set-matrix
-        working-directory: tests
-        run: |
-          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove('deepspeed'); x.remove('pipelines'); x.remove('extended'); print(x)')"
-        
-
-      - name: NVIDIA-SMI
-        run: |
-          nvidia-smi
-          
-      - name: Are GPUs recognized by our DL frameworks
-        run: |
-          utils/print_env_pt.py
-          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
-          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
-          python3 -c "from jax.lib import xla_bridge; print('GPU available:', xla_bridge.get_backend().platform)"
-          python3 -c "import jax; print('Number of GPUs available:', len(jax.local_devices()))"
-
-  run_tests_gpu:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: identify_models
-    strategy:
-      fail-fast: false
-      matrix:
-        folders: ${{ fromJson(needs.identify_models.outputs.matrix) }}
-    steps:
-      - name: Echo folder ${{ matrix.folders }}
-        run: echo "${{ matrix.folders }}"
-
-      - name: Update repo
-        run: git pull
-
-      - name: Run all non-slow tests on GPU
-        run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
-
-      - name: Failure short reports
-        if: ${{ failure() }}
-        continue-on-error: true
-        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
-
-      - name: Test suite reports artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
-          path: reports/tests_gpu_${{ matrix.folders }}
-
-  run_examples_gpu:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: identify_models
-    steps:
-      - name: Update repo
-        run: git pull
-
-      - name: Run examples tests on GPU
-        run: |
-          pip install -r examples/pytorch/_tests_requirements.txt
-          python3 -m pytest -v --make-reports=examples_torch_gpu examples
-
-      - name: Test suite reports artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: run_all_examples_gpu_test_reports
-          path: reports/examples_torch_gpu
+#  identify_models:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-all-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    outputs:
+#      matrix: ${{ steps.set-matrix.outputs.matrix }}
+#    steps:
+#      - name: Launcher docker
+#        uses: actions/checkout@v2
+#
+#      - id: set-matrix
+#        working-directory: tests
+#        run: |
+#          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove('deepspeed'); x.remove('pipelines'); x.remove('extended'); print(x)')"
+#
+#
+#      - name: NVIDIA-SMI
+#        run: |
+#          nvidia-smi
+#
+#      - name: Are GPUs recognized by our DL frameworks
+#        run: |
+#          utils/print_env_pt.py
+#          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
+#          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
+#          python3 -c "from jax.lib import xla_bridge; print('GPU available:', xla_bridge.get_backend().platform)"
+#          python3 -c "import jax; print('Number of GPUs available:', len(jax.local_devices()))"
+#
+#  run_tests_gpu:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-all-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    needs: identify_models
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        folders: ${{ fromJson(needs.identify_models.outputs.matrix) }}
+#    steps:
+#      - name: Echo folder ${{ matrix.folders }}
+#        run: echo "${{ matrix.folders }}"
+#
+#      - name: Update repo
+#        run: git pull
+#
+#      - name: Run all non-slow tests on GPU
+#        run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
+#
+#      - name: Failure short reports
+#        if: ${{ failure() }}
+#        continue-on-error: true
+#        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
+#
+#      - name: Test suite reports artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
+#          path: reports/tests_gpu_${{ matrix.folders }}
+#
+#  run_examples_gpu:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-all-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    needs: identify_models
+#    steps:
+#      - name: Update repo
+#        run: git pull
+#
+#      - name: Run examples tests on GPU
+#        run: |
+#          pip install -r examples/pytorch/_tests_requirements.txt
+#          python3 -m pytest -v --make-reports=examples_torch_gpu examples
+#
+#      - name: Test suite reports artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: run_all_examples_gpu_test_reports
+#          path: reports/examples_torch_gpu
 
 #  run_pipelines_gpu:
 #    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
@@ -137,7 +137,7 @@ jobs:
       options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     steps:
       - name: Update repo
-        run: git pull
+        run: cd transformers && git pull
 
       - name: Run all tests on GPU
         run: |
@@ -150,20 +150,20 @@ jobs:
           name: run_tests_torch_cuda_extensions_gpu_test_reports
           path: reports/tests_torch_cuda_extensions_gpu
 
-  send_results:
-    name: Send results to webhook
-    runs-on: ubuntu-latest
-    if: always()
-    needs: [identify_models, run_tests_gpu, run_examples_gpu, run_all_tests_torch_cuda_extensions_gpu]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-      - name: Send message to Slack
-        env:
-          CI_SLACK_BOT_TOKEN: ${{ secrets.CI_SLACK_BOT_TOKEN }}
-          CI_SLACK_CHANNEL_ID: ${{ secrets.CI_SLACK_CHANNEL_ID }}
-          CI_SLACK_CHANNEL_ID_DAILY: ${{ secrets.CI_SLACK_CHANNEL_ID_DAILY }}
-          CI_SLACK_CHANNEL_DUMMY_TESTS: ${{ secrets.CI_SLACK_CHANNEL_DUMMY_TESTS }}
-        run: |
-          pip install slack_sdk
-          python utils/notification_service.py "${{ needs.identify_models.outputs.matrix }}"
+#  send_results:
+#    name: Send results to webhook
+#    runs-on: ubuntu-latest
+#    if: always()
+#    needs: [identify_models, run_tests_gpu, run_examples_gpu, run_all_tests_torch_cuda_extensions_gpu]
+#    steps:
+#      - uses: actions/checkout@v2
+#      - uses: actions/download-artifact@v2
+#      - name: Send message to Slack
+#        env:
+#          CI_SLACK_BOT_TOKEN: ${{ secrets.CI_SLACK_BOT_TOKEN }}
+#          CI_SLACK_CHANNEL_ID: ${{ secrets.CI_SLACK_CHANNEL_ID }}
+#          CI_SLACK_CHANNEL_ID_DAILY: ${{ secrets.CI_SLACK_CHANNEL_ID_DAILY }}
+#          CI_SLACK_CHANNEL_DUMMY_TESTS: ${{ secrets.CI_SLACK_CHANNEL_DUMMY_TESTS }}
+#        run: |
+#          pip install slack_sdk
+#          python utils/notification_service.py "${{ needs.identify_models.outputs.matrix }}"
