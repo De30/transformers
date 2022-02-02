@@ -38,7 +38,7 @@ jobs:
       - id: set-matrix
         working-directory: tests
         run: |
-          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x)')"
+          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:2])')"
 
       - name: NVIDIA-SMI
         run: |
