@@ -137,11 +137,11 @@ jobs:
       options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     steps:
       - name: Update repo
-        run: ls
+        run: cd /workspace/transformers && git pull
 
       - name: Run all tests on GPU
         run: |
-          python -m pytest -n 1 -v --dist=loadfile --make-reports=tests_torch_cuda_extensions_gpu tests/deepspeed tests/extended
+          python -m pytest -v --make-reports=tests_torch_cuda_extensions_gpu tests/deepspeed tests/extended
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
