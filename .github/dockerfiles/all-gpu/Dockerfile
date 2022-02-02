@@ -9,7 +9,7 @@ RUN apt install -y git libsndfile1-dev tesseract-ocr espeak-ng python3 python3-p
 RUN git clone https://github.com/huggingface/transformers
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip
-RUN python3 -m pip install --no-cache-dir ./transformers[dev]
+RUN python3 -m pip install --no-cache-dir -e ./transformers[dev]
 RUN python3 -m pip install --no-cache-dir -U torch~=1.10 tensorflow~=2.7 flax
 
 RUN python3 -m pip install --no-cache-dir torch-scatter -f https://data.pyg.org/whl/torch-$(python3 -c "from torch import version; print(version.__version__.split('+')[0])")+cpu.html
