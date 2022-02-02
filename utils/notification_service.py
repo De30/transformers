@@ -23,7 +23,6 @@ from typing import Dict, Tuple
 
 client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
 
-
 def handle_test_results(test_results):
     expressions = test_results.split(" ")
 
@@ -51,7 +50,7 @@ class Message:
         self._module_failures = module_failures
 
         self.n_failures = sum(category_failures.values())
-        self.n_tests = sum(r['success'] + r['failed'] for r in results.values())
+        self.n_tests = sum(r['success'] + r['failed']['total'] for r in results.values())
         self.results = results
 
         self.thread_ts = None
@@ -68,6 +67,7 @@ class Message:
             if len(time_parts) == 1:
                 time_parts = [0, 0, time_parts[0]]
 
+            print(time, time_parts[2])
             hours, minutes, seconds = int(time_parts[0]), int(time_parts[1]), float(time_parts[2])
             total_secs += hours * 3600 + minutes * 60 + seconds
 
@@ -178,11 +178,47 @@ class Message:
 
         for job, job_result in results.items():
             if len(job_result["failures"]):
+                del job_result['failed']['total']
+
+                failures = '\n'.join(sorted([f'*{k}*: {v}' for k, v in job_result['failed'].items() if v > 0]))
+
+                job_result['failures'] = job_result['failures'].replace("FAILED ", "")
+
+                if len(job_result['failures']) > 2500:
+                    job_result['failures'] = '\n'.join(job_result['failures'].split('\n')[:20]) + '\n\n[Truncated] ...'
+
+                blocks = [
+                    {
+                        "type": "header",
+                        "text": {
+                            "type": "plain_text",
+                            "text": job,
+                            "emoji": True
+                        }
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": failures
+                        }
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "plain_text",
+                            "text": job_result['failures']
+                        }
+                    }
+                ]
+
                 print("Sending the following reply")
-                print(f"{job}\n{job_result['failures']}")
+                print(json.dumps(blocks))
+
                 client.chat_postMessage(
                     channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
-                    text=f"{job}\n{job_result['failures']}",
+                    text=f"Results for {job}",
+                    blocks=blocks,
                     thread_ts=self.thread_ts["ts"]
                 )
 
@@ -194,7 +230,6 @@ if __name__ == "__main__":
     if len(models) == 0:
         models = [a.split("/")[-1] for a in list(filter(os.path.isdir, (os.path.join("/home/lysandre/transformers/tests", f) for f in os.listdir("/home/lysandre/transformers/tests"))))]
 
-    results = {}
     failure_categories = {
         "PyTorch": 0,
         "TensorFlow": 0,
@@ -205,11 +240,20 @@ if __name__ == "__main__":
         "ONNX": 0,
         "Unclassified": 0
     }
+    results = {
+        model: {
+            "failed": {'total': 0, **failure_categories},
+            "success": 0,
+            "time_spent": "",
+            "failures": ""
+        } for model in models if os.path.exists(f'run_all_tests_gpu_{model}_test_reports')
+    }
+
     module_failures = {}
     unclassified_failures = []
+
     for model in models:
         if os.path.exists(f'run_all_tests_gpu_{model}_test_reports'):
-            results[model] = {"failed": 0, "success": 0, "time_spent": "", "failures": ""}
             files = os.listdir(f'run_all_tests_gpu_{model}_test_reports')
 
             with open(os.path.join(f"run_all_tests_gpu_{model}_test_reports", f"tests_gpu_{model}_stats.txt")) as f:
@@ -218,7 +262,7 @@ if __name__ == "__main__":
                 if failed:
                     module_failures[model] = failed
 
-                results[model]["failed"] += failed
+                results[model]["failed"]['total'] += failed
                 results[model]["success"] += success
                 results[model]["time_spent"] += time_spent[1:-1] + ", "
 
@@ -230,25 +274,34 @@ if __name__ == "__main__":
                         if re.search('test_modeling', line):
                             if re.search("_tf_", line):
                                 failure_categories['TensorFlow'] += 1
+                                results[model]['failed']["TensorFlow"] += 1
+
                             elif re.search("_flax_", line):
                                 failure_categories['Flax'] += 1
+                                results[model]['failed']['Flax'] += 1
                             else:
                                 failure_categories['PyTorch'] += 1
+                                results[model]['failed']['PyTorch'] += 1
 
                         elif re.search('test_tokenization', line):
                             failure_categories['Tokenizers'] += 1
+                            results[model]['failed']['Tokenizers'] += 1
 
                         elif re.search('test_pipelines', line):
                             failure_categories['Pipelines'] += 1
+                            results[model]['failed']['Pipelines'] += 1
 
                         elif re.search('test_trainer', line):
                             failure_categories['Trainer'] += 1
+                            results[model]['failed']['Trainer'] += 1
 
                         elif re.search('onnx', line):
                             failure_categories['ONNX'] += 1
+                            results[model]['failed']['ONNX'] += 1
 
                         else:
                             failure_categories['Unclassified'] += 1
+                            results[model]['failed']['Unclassified'] += 1
                             unclassified_failures.append(line)
 
     # Examples

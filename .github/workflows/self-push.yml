@@ -38,7 +38,7 @@ jobs:
       - id: set-matrix
         working-directory: tests
         run: |
-          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:5])')"
+          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove('deepspeed'); x.remove('pipelines'); x.remove('extended'); print(x[:5])')"
         
 
       - name: NVIDIA-SMI
@@ -50,6 +50,8 @@ jobs:
           utils/print_env_pt.py
           TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
           TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
+          python3 -c "from jax.lib import xla_bridge; print('GPU available:', xla_bridge.get_backend().platform)"
+          python3 -c "import jax; print('Number of GPUs available:', len(jax.local_devices()))"
 
   run_tests_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
@@ -119,6 +121,26 @@ jobs:
         with:
           name: run_all_tests_pipeline_gpu_test_reports
           path: reports/tests_torch_pipeline_gpu
+
+  run_all_tests_torch_cuda_extensions_gpu:
+    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    container:
+      image: huggingface/transformers-pytorch-latest-release-deepspeed-gpu
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    steps:
+      - name: Launcher docker
+        uses: actions/checkout@v2
+
+      - name: Run all tests on GPU
+        run: |
+          python -m pytest -n 1 -v --dist=loadfile --make-reports=tests_torch_cuda_extensions_gpu tests/deepspeed tests/extended
+
+      - name: Test suite reports artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: run_tests_torch_cuda_extensions_gpu_test_reports
+          path: reports/tests_torch_cuda_extensions_gpu
 
   send_results:
     name: Send results to webhook
