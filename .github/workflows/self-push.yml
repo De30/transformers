@@ -124,7 +124,7 @@ jobs:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
-    needs: [list-test-folders, run_tests_gpu, run_examples_gpu]
+    needs: [list-test-folders, run_tests_gpu, run_examples_gpu, run_pipelines_gpu]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
