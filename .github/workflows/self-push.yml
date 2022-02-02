@@ -33,7 +33,6 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Update clone
-        working-directory: transformers
         run: git fetch && git checkout ${{ github.sha }}
 
       - id: set-matrix
