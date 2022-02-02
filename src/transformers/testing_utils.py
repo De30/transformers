@@ -1257,7 +1257,7 @@ def pytest_terminal_summary_main(tr, id):
     orig_tbstyle = config.option.tbstyle
     orig_reportchars = tr.reportchars
 
-    dir = "reports"
+    dir = f"reports/{id}"
     Path(dir).mkdir(parents=True, exist_ok=True)
     report_files = {
         k: f"{dir}/{id}_{k}.txt"
