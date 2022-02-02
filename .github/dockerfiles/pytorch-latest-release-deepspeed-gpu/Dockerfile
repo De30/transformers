@@ -1,7 +1,7 @@
 FROM nvcr.io/nvidia/pytorch:21.03-py3
 LABEL maintainer="Hugging Face"
 
-RUN apt update
+RUN apt -y update
 RUN apt install -y git libaio-dev
 
 
