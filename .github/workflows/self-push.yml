@@ -36,7 +36,7 @@ jobs:
         run: git fetch && git checkout ${{ github.sha }}
 
       - id: set-matrix
-        working-directory: transformers/tests
+        working-directory: tests
         run: |
           echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove('deepspeed'); x.remove('pipelines'); x.remove('extended'); print(x)')"
 
@@ -45,7 +45,6 @@ jobs:
           nvidia-smi
 
       - name: Are GPUs recognized by our DL frameworks
-        working-directory: transformers
         run: |
           utils/print_env_pt.py
           TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
@@ -68,11 +67,9 @@ jobs:
         run: echo "${{ matrix.folders }}"
 
       - name: Update clone
-        working-directory: transformers
         run: git fetch && git checkout ${{ github.sha }}
 
       - name: Run all non-slow tests on GPU
-        working-directory: transformers
         run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
 
       - name: Failure short reports
@@ -95,11 +92,9 @@ jobs:
     needs: identify_models
     steps:
       - name: Update clone
-        working-directory: transformers
         run: git fetch && git checkout ${{ github.sha }}
 
       - name: Run examples tests on GPU
-        working-directory: transformers
         run: |
           pip install -r examples/pytorch/_tests_requirements.txt
           python3 -m pytest -v --make-reports=examples_torch_gpu examples
