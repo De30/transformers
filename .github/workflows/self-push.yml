@@ -137,7 +137,7 @@ jobs:
       options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     steps:
       - name: Update repo
-        run: cd transformers && git pull
+        run: ls
 
       - name: Run all tests on GPU
         run: |
