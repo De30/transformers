@@ -39,7 +39,7 @@ jobs:
         working-directory: tests
         run: |
           ls
-          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove('deepspeed'); x.remove('pipelines'); x.remove('extended'); print(x)')"
+          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); x.remove(\'deepspeed\'); x.remove(\'pipelines\'); x.remove(\'extended\'); print(x)')"
 
       - name: NVIDIA-SMI
         run: |
