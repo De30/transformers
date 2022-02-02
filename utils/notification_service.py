@@ -17,7 +17,11 @@ import re
 import sys
 import json
 
-# from slack_sdk import WebClient
+from slack_sdk import WebClient
+from typing import Dict, Tuple
+
+
+client = WebClient(token=os.environ["CI_SLACK_WEBHOOK_URL"])
 
 
 def handle_test_results(test_results):
@@ -39,89 +43,166 @@ def handle_test_results(test_results):
     return failed, success, time_spent
 
 
-def format_for_slack(total_results, results, scheduled: bool, title: str):
-    print(total_results, results)
-    header = {
-        "type": "header",
-        "text": {
-            "type": "plain_text",
-            "text": title,
-            "emoji": True,
-        },
-    }
+class Message:
+    def __init__(self, title: str, module_failures: Dict, category_failures: Dict, results: Dict):
+        self.title = title
 
-    if total_results["failed"] > 0:
-        total = {
-            "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": f"*Failures:*\n❌ {total_results['failed']} failures."},
-                {"type": "mrkdwn", "text": f"*Passed:*\n✅ {total_results['success']} tests passed."},
-            ],
+        self._category_failures = category_failures
+        self._module_failures = module_failures
+
+        self.n_failures = sum(category_failures.values())
+        self.n_tests = sum(r['success'] + r['failed'] for r in results.values())
+        self.results = results
+
+        self.thread_ts = None
+
+    @property
+    def time(self) -> str:
+        time_spent = [r['time_spent'].split(', ')[0] for r in self.results.values()]
+        total_secs = 0
+
+        for time in time_spent:
+            time_parts = time.split(':')
+
+            # Time can be formatted as xx:xx:xx, as .xx, or as x.xx if the time spent was less than a minute.
+            if len(time_parts) == 1:
+                time_parts = [0, 0, time_parts[0]]
+
+            hours, minutes, seconds = int(time_parts[0]), int(time_parts[1]), float(time_parts[2])
+            total_secs += hours * 3600 + minutes * 60 + seconds
+
+        hours, minutes, seconds = total_secs // 3600, (total_secs % 3600) // 60, total_secs % 60
+        return f"{int(hours)}h{int(minutes)}m{int(seconds)}s"
+
+    @property
+    def header(self) -> Dict:
+        return {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": self.title
+            }
         }
-    else:
-        total = {
+
+    @property
+    def no_failures(self) -> Dict:
+        return {
             "type": "section",
-            "fields": [
-                {"type": "mrkdwn", "text": "\n🌞 All tests passed."},
-            ],
+            "text": {
+                "type": "plain_text",
+                "text": f"🌞 There were no failures: all {self.n_tests} tests passed. The suite ran in {self.time}.",
+                "emoji": True
+            },
+            "accessory": {
+                "type": "button",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Check Action results",
+                    "emoji": True
+                },
+                "value": "click_me_123",
+                "url": f"https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+                "action_id": "button-action"
+            }
         }
 
-    blocks = [header, total]
+    @property
+    def failures(self) -> Dict:
+        return {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": f"There were {self.n_failures} failures, out of {self.n_tests} tests.\nThe suite ran in {self.time}.",
+                "emoji": True
+            },
+            "accessory": {
+                "type": "button",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Check Action results",
+                    "emoji": True
+                },
+                "value": "click_me_123",
+                "url": f"https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+                "action_id": "button-action"
+            }
+        }
 
-    if total_results["failed"] > 0:
-        for key, result in results.items():
-            print(key, result)
-            blocks.append({"type": "header", "text": {"type": "plain_text", "text": key, "emoji": True}})
-            blocks.append(
-                {
-                    "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Results:*\n{result['failed']} failed, {result['success']} passed.",
-                        },
-                        {"type": "mrkdwn", "text": f"*Time spent:*\n{result['time_spent']}"},
-                    ],
-                }
-            )
-    elif not scheduled:
-        for key, result in results.items():
-            blocks.append(
-                {"type": "section", "fields": [{"type": "mrkdwn", "text": f"*{key}*\n{result['time_spent']}."}]}
-            )
+    @property
+    def category_failures(self) -> Dict:
+        failures = '\n'.join(sorted([f'*{k}*: {v}' for k, v in self._category_failures.items()]))
 
-    footer = {
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": f"<https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}|View on GitHub>",
-        },
-    }
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"The following categories had failures:\n{failures}"
+            }
+        }
 
-    blocks.append(footer)
+    @property
+    def module_failures(self) -> Dict:
+        failures = '\n'.join(sorted([f'*{k}*: {v}' for k, v in self._module_failures.items()]))
 
-    blocks = {"blocks": blocks}
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"These following modules had failures:\n{failures}"
+            }
+        }
 
-    return blocks
+    @property
+    def payload(self) -> str:
+        blocks = [self.header]
+
+        if self.n_failures > 0:
+            blocks.extend([self.failures, self.category_failures, self.module_failures])
+        else:
+            blocks.append(self.no_failures)
+
+        return json.dumps({"blocks": blocks})
+
+
+    def post(self):
+        self.thread_ts = client.chat_postMessage(
+            channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
+            blocks=self.payload,
+        )
+
+    def post_reply(self):
+        if self.thread_ts is None:
+            raise ValueError("Can only post reply if a post has been made.")
+
+        for job, job_result in results.items():
+            if len(job_result["failures"]):
+                client.chat_postMessage(
+                    channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
+                    text=f"{job}\n{job_result['failures']}",
+                    thread_ts=self.thread_ts
+                )
 
 
 if __name__ == "__main__":
     arguments = sys.argv[1:][0]
-
-    print(arguments)
-
     models = ast.literal_eval(arguments)
 
-    print(models)
-
-    print(os.listdir('.'))
+    if len(models) == 0:
+        models = [a.split("/")[-1] for a in list(filter(os.path.isdir, (os.path.join("/home/lysandre/transformers/tests", f) for f in os.listdir("/home/lysandre/transformers/tests"))))]
 
     results = {}
-    framework_related_failures = {
-        "pt": 0,
-        "tf": 0,
-        "flax": 0
+    failure_categories = {
+        "PyTorch": 0,
+        "TensorFlow": 0,
+        "Flax": 0,
+        "Tokenizers": 0,
+        "Pipelines": 0,
+        "Trainer": 0,
+        "ONNX": 0,
+        "Unclassified": 0
     }
+    module_failures = {}
+    unclassified_failures = []
     for model in models:
         if os.path.exists(f'run_all_tests_gpu_{model}_test_reports'):
             results[model] = {"failed": 0, "success": 0, "time_spent": "", "failures": ""}
@@ -129,23 +210,51 @@ if __name__ == "__main__":
 
             with open(os.path.join(f"run_all_tests_gpu_{model}_test_reports", f"tests_gpu_{model}_stats.txt")) as f:
                 failed, success, time_spent = handle_test_results(f.read())
+
+                if failed:
+                    module_failures[model] = failed
+
                 results[model]["failed"] += failed
                 results[model]["success"] += success
                 results[model]["time_spent"] += time_spent[1:-1] + ", "
+
             with open(os.path.join(f"run_all_tests_gpu_{model}_test_reports", f"tests_gpu_{model}_summary_short.txt")) as f:
                 for line in f:
                     if re.search("FAILED", line):
                         results[model]["failures"] += line
+
                         if re.search('test_modeling', line):
                             if re.search("_tf_", line):
-                                framework_related_failures['tf'] += 1
+                                failure_categories['TensorFlow'] += 1
                             elif re.search("_flax_", line):
-                                framework_related_failures['flax'] += 1
+                                failure_categories['Flax'] += 1
                             else:
-                                framework_related_failures['pt'] += 1
+                                failure_categories['PyTorch'] += 1
 
+                        elif re.search('test_tokenization', line):
+                            failure_categories['Tokenizers'] += 1
 
+                        elif re.search('test_pipelines', line):
+                            failure_categories['Pipelines'] += 1
 
+                        elif re.search('test_trainer', line):
+                            failure_categories['Trainer'] += 1
 
-    print(results)
-    print(framework_related_failures)
+                        elif re.search('onnx', line):
+                            failure_categories['ONNX'] += 1
+
+                        else:
+                            failure_categories['Unclassified'] += 1
+                            unclassified_failures.append(line)
+    
+    message = Message(
+        title="🤗 Results of the scheduled tests.",
+        module_failures=module_failures,
+        category_failures={k: v for k, v in failure_categories.items() if v > 0},
+        results=results
+    )
+
+    print(message.payload)
+
+    message.post()
+    message.post_reply()
