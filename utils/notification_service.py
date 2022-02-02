@@ -21,7 +21,7 @@ from slack_sdk import WebClient
 from typing import Dict, Tuple
 
 
-client = WebClient(token=os.environ["CI_SLACK_WEBHOOK_URL"])
+client = WebClient(token=os.environ["CI_SLACK_BOT_TOKEN"])
 
 
 def handle_test_results(test_results):
