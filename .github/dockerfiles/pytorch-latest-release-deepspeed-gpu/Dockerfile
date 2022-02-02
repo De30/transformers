@@ -8,4 +8,4 @@ RUN apt install -y git libaio-dev
 RUN git clone https://github.com/huggingface/transformers
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip && \
-    python3 -m pip install ./transformers[testing,deepspeed]
+    python3 -m pip install -e ./transformers[testing,deepspeed]

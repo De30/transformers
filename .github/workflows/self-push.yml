@@ -136,10 +136,11 @@ jobs:
       image: huggingface/transformers-pytorch-latest-release-deepspeed-gpu
       options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     steps:
-      - name: Update repo
-        run: cd /workspace/transformers && git pull
+      - name: Update clone
+        run: cd /workspace/transformers && git fetch && git checkout  ${{ github.sha }}
 
       - name: Run all tests on GPU
+        working-directory: /workspace/transformers
         run: |
           python -m pytest -v --make-reports=tests_torch_cuda_extensions_gpu tests/deepspeed tests/extended
 
@@ -148,7 +149,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: run_tests_torch_cuda_extensions_gpu_test_reports
-          path: reports/tests_torch_cuda_extensions_gpu
+          path: /workspace/transformers/reports/tests_torch_cuda_extensions_gpu
 
 #  send_results:
 #    name: Send results to webhook
