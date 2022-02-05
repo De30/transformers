@@ -11,4 +11,11 @@ RUN git clone https://github.com/huggingface/transformers
 RUN python3 -m pip install --no-cache-dir --upgrade pip
 RUN python3 -m pip install --no-cache-dir -e ./transformers[dev]
 RUN python3 -m pip install --no-cache-dir -U torch~=1.10
-RUN python3 -m pip uninstall -y torch flax
+RUN python3 -m pip uninstall -y tensorflow flax
+
+RUN python3 -m pip install --no-cache-dir torch-scatter -f https://data.pyg.org/whl/torch-$(python3 -c "from torch import version; print(version.__version__.split('+')[0])")+cpu.html
+RUN python3 -m pip install --no-cache-dir git+https://github.com/facebookresearch/detectron2.git pytesseract https://github.com/kpu/kenlm/archive/master.zip
+
+# When installing in editable mode, `transformers` is not recognized as a package.
+# this line must be added in order for python to be aware of transformers.
+RUN cd transformers && python3 setup.py develop
