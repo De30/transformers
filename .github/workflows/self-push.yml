@@ -138,7 +138,10 @@ jobs:
 #    needs: identify_models
     steps:
       - name: Update clone
-        run: git fetch && git checkout ${{ github.sha }}
+        run: |
+          git fetch && git checkout ${{ github.sha }}
+          pip uninstall -y transformers
+          pip install -e .
 
       - name: Run all pipeline tests on GPU
         env:
