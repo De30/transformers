@@ -35,12 +35,13 @@ jobs:
       - name: Update clone
         run: |
           git fetch && git checkout ${{ github.sha }}
+          rm -rf tests/__pycache__
           rm -rf reports
 
       - id: set-matrix
+        name: Identify models to test
         working-directory: tests
         run: |
-          rm -rf __pycache__
           echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:2])')"
 
       - name: NVIDIA-SMI
@@ -87,28 +88,29 @@ jobs:
 #          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
 #          path: reports/tests_gpu_${{ matrix.folders }}
 #
-#  run_examples_gpu:
-#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-#    container:
-#      image: huggingface/transformers-all-latest-gpu
-#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-#    needs: identify_models
-#    steps:
-#      - name: Update clone
-#        run: git fetch && git checkout ${{ github.sha }}
-#
-#      - name: Run examples tests on GPU
-#        run: |
-#          pip install -r examples/pytorch/_tests_requirements.txt
-#          python3 -m pytest -v --make-reports=examples_gpu examples
-#
-#      - name: Test suite reports artifacts
-#        if: ${{ always() }}
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: run_all_examples_gpu_test_reports
-#          path: reports/examples_gpu
-#
+  run_examples_gpu:
+    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    container:
+      image: huggingface/transformers-all-latest-gpu
+      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    needs: identify_models
+    steps:
+      - name: Update clone
+        working-directory: /transformers
+        run: git fetch && git checkout ${{ github.sha }}
+
+      - name: Run examples tests on GPU
+        run: |
+          pip install -r examples/pytorch/_tests_requirements.txt
+          python3 -m pytest -v --make-reports=examples_gpu examples
+
+      - name: Test suite reports artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: run_examples_gpu
+          path: reports/examples_gpu
+
   run_pipelines_torch_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
@@ -149,7 +151,7 @@ jobs:
         env:
           RUN_PIPELINE_TESTS: yes
         run: |
-          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports-folder=tests_tf_pipeline_gpu tests
+          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_tf_pipeline_gpu tests
 
       - name: Failure short reports
         if: ${{ always() }}
@@ -194,7 +196,7 @@ jobs:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
-    needs: run_pipelines_tf_gpu
+    needs: [run_examples_gpu, run_pipelines_tf_gpu, run_pipelines_torch_gpu]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
