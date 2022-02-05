@@ -38,6 +38,7 @@ jobs:
 #      - id: set-matrix
 #        working-directory: tests
 #        run: |
+#          rm -rf __pycache__
 #          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:2])')"
 #
 #      - name: NVIDIA-SMI
@@ -143,7 +144,7 @@ jobs:
         env:
           RUN_PIPELINE_TESTS: yes
         run: |
-          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_tf_pipeline_gpu tests
+          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports-folder=tests_tf_pipeline_gpu tests
 
       - name: Failure short reports
         if: ${{ always() }}

@@ -1215,7 +1215,7 @@ def pytest_addoption_shared(parser):
     option.
 
     """
-    option = "--make-reports"
+    option = "--make-reports-folder"
     if option not in pytest_opt_registered:
         parser.addoption(
             option,
