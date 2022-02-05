@@ -24,117 +24,117 @@ env:
   RUN_SLOW: yes
 
 jobs:
-  identify_models:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Update clone
-        run: git fetch && git checkout ${{ github.sha }}
-
-      - id: set-matrix
-        working-directory: tests
-        run: |
-          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:2])')"
-
-      - name: NVIDIA-SMI
-        run: |
-          nvidia-smi
-
-      - name: Are GPUs recognized by our DL frameworks
-        run: |
-          utils/print_env_pt.py
-          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
-          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
-          python3 -c "from jax.lib import xla_bridge; print('GPU available:', xla_bridge.get_backend().platform)"
-          python3 -c "import jax; print('Number of GPUs available:', len(jax.local_devices()))"
-
-  run_tests_gpu:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: identify_models
-    strategy:
-      fail-fast: false
-      matrix:
-        folders: ${{ fromJson(needs.identify_models.outputs.matrix) }}
-    steps:
-      - name: Echo folder ${{ matrix.folders }}
-        run: echo "${{ matrix.folders }}"
-
-      - name: Update clone
-        run: git fetch && git checkout ${{ github.sha }}
-
-      - name: Run all non-slow tests on GPU
-        run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
-
-      - name: Failure short reports
-        if: ${{ failure() }}
-        continue-on-error: true
-        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
-
-      - name: Test suite reports artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
-          path: reports/tests_gpu_${{ matrix.folders }}
-
-  run_examples_gpu:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: identify_models
-    steps:
-      - name: Update clone
-        run: git fetch && git checkout ${{ github.sha }}
-
-      - name: Run examples tests on GPU
-        run: |
-          pip install -r examples/pytorch/_tests_requirements.txt
-          python3 -m pytest -v --make-reports=examples_gpu examples
-
-      - name: Test suite reports artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: run_all_examples_gpu_test_reports
-          path: reports/examples_gpu
-
-  run_pipelines_torch_gpu:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    container:
-      image: huggingface/transformers-pytorch-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: identify_models
-    steps:
-      - name: Update clone
-        run: git fetch && git checkout ${{ github.sha }}
-
-      - name: Run all pipeline tests on GPU
-        env:
-          RUN_PIPELINE_TESTS: yes
-        run: |
-          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_torch_pipeline_gpu tests
-
-      - name: Test suite reports artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: run_all_tests_pipeline_gpu_test_reports
-          path: reports/tests_torch_pipeline_gpu
+#  identify_models:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-all-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    outputs:
+#      matrix: ${{ steps.set-matrix.outputs.matrix }}
+#    steps:
+#      - name: Update clone
+#        run: git fetch && git checkout ${{ github.sha }}
+#
+#      - id: set-matrix
+#        working-directory: tests
+#        run: |
+#          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:2])')"
+#
+#      - name: NVIDIA-SMI
+#        run: |
+#          nvidia-smi
+#
+#      - name: Are GPUs recognized by our DL frameworks
+#        run: |
+#          utils/print_env_pt.py
+#          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
+#          TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('Number of TF GPUs available:', len(tf.config.list_physical_devices('GPU')))"
+#          python3 -c "from jax.lib import xla_bridge; print('GPU available:', xla_bridge.get_backend().platform)"
+#          python3 -c "import jax; print('Number of GPUs available:', len(jax.local_devices()))"
+#
+#  run_tests_gpu:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-all-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    needs: identify_models
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        folders: ${{ fromJson(needs.identify_models.outputs.matrix) }}
+#    steps:
+#      - name: Echo folder ${{ matrix.folders }}
+#        run: echo "${{ matrix.folders }}"
+#
+#      - name: Update clone
+#        run: git fetch && git checkout ${{ github.sha }}
+#
+#      - name: Run all non-slow tests on GPU
+#        run: python3 -m pytest -v --make-reports=tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
+#
+#      - name: Failure short reports
+#        if: ${{ failure() }}
+#        continue-on-error: true
+#        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
+#
+#      - name: Test suite reports artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
+#          path: reports/tests_gpu_${{ matrix.folders }}
+#
+#  run_examples_gpu:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-all-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    needs: identify_models
+#    steps:
+#      - name: Update clone
+#        run: git fetch && git checkout ${{ github.sha }}
+#
+#      - name: Run examples tests on GPU
+#        run: |
+#          pip install -r examples/pytorch/_tests_requirements.txt
+#          python3 -m pytest -v --make-reports=examples_gpu examples
+#
+#      - name: Test suite reports artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: run_all_examples_gpu_test_reports
+#          path: reports/examples_gpu
+#
+#  run_pipelines_torch_gpu:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    container:
+#      image: huggingface/transformers-pytorch-latest-gpu
+#      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    needs: identify_models
+#    steps:
+#      - name: Update clone
+#        run: git fetch && git checkout ${{ github.sha }}
+#
+#      - name: Run all pipeline tests on GPU
+#        env:
+#          RUN_PIPELINE_TESTS: yes
+#        run: |
+#          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_torch_pipeline_gpu tests
+#
+#      - name: Test suite reports artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: run_all_tests_pipeline_gpu_test_reports
+#          path: reports/tests_torch_pipeline_gpu
 
   run_pipelines_tf_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/transformers-tensorflow-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: identify_models
+#    needs: identify_models
     steps:
       - name: Update clone
         run: git fetch && git checkout ${{ github.sha }}
@@ -145,6 +145,14 @@ jobs:
         run: |
           python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_tf_pipeline_gpu tests
 
+      - name: Failure short reports
+        if: ${{ always() }}
+        run: |
+          ls
+          ls reports
+          ls reports/tests_tf_pipeline_gpu
+          cat reports/tests_tf_pipeline_gpu/tests_tf_pipeline_gpu_failures_short.txt
+
       - name: Test suite reports artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
@@ -152,35 +160,35 @@ jobs:
           name: run_all_tests_pipeline_gpu_test_reports
           path: reports/tests_tf_pipeline_gpu
 
-  run_all_tests_torch_cuda_extensions_gpu:
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
-    needs: identify_models
-    container:
-      image: huggingface/transformers-pytorch-latest-release-deepspeed-gpu
-      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    steps:
-      - name: Update clone
-        working-directory: /workspace/transformers
-        run: git fetch && git checkout ${{ github.sha }}
-
-      - name: Run all tests on GPU
-        working-directory: /workspace/transformers
-        run: |
-          python -m pytest -v --make-reports=tests_torch_cuda_extensions_gpu tests/deepspeed tests/extended
-
-      - name: Test suite reports artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: run_tests_torch_cuda_extensions_gpu_test_reports
-          path: reports/tests_torch_cuda_extensions_gpu
+#  run_all_tests_torch_cuda_extensions_gpu:
+#    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+#    needs: identify_models
+#    container:
+#      image: huggingface/transformers-pytorch-latest-release-deepspeed-gpu
+#      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+#    steps:
+#      - name: Update clone
+#        working-directory: /workspace/transformers
+#        run: git fetch && git checkout ${{ github.sha }}
+#
+#      - name: Run all tests on GPU
+#        working-directory: /workspace/transformers
+#        run: |
+#          python -m pytest -v --make-reports=tests_torch_cuda_extensions_gpu tests/deepspeed tests/extended
+#
+#      - name: Test suite reports artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: run_tests_torch_cuda_extensions_gpu_test_reports
+#          path: reports/tests_torch_cuda_extensions_gpu
 
 
   send_results:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
-    needs: [identify_models, run_tests_gpu, run_examples_gpu, run_pipelines_tf_gpu, run_pipelines_torch_gpu, run_all_tests_torch_cuda_extensions_gpu]
+    needs: run_pipelines_tf_gpu
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
