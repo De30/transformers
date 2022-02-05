@@ -38,7 +38,7 @@ jobs:
       - id: set-matrix
         working-directory: tests
         run: |
-          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x)')"
+          echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:2])')"
 
       - name: NVIDIA-SMI
         run: |
@@ -82,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
-          path: transformers/reports/tests_gpu_${{ matrix.folders }}
+          path: reports/tests_gpu_${{ matrix.folders }}
 
   run_examples_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
@@ -104,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: run_all_examples_gpu_test_reports
-          path: transformers/reports/examples_gpu
+          path: reports/examples_gpu
 
   run_pipelines_torch_gpu:
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
@@ -173,7 +173,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: run_tests_torch_cuda_extensions_gpu_test_reports
-          path: /workspace/transformers/reports/tests_torch_cuda_extensions_gpu
+          path: reports/tests_torch_cuda_extensions_gpu
 
 
   send_results:
