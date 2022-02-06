@@ -137,6 +137,7 @@ jobs:
   run_pipelines_torch_gpu:
     name: PyTorch pipelines
     strategy:
+      fail-fast: false
       matrix:
         machines: [multi-gpu-docker, single-gpu-docker]
     runs-on: ${{ matrix.machines }}
@@ -171,6 +172,7 @@ jobs:
   run_pipelines_tf_gpu:
     name: TensorFlow pipelines
     strategy:
+      fail-fast: false
       matrix:
         machines: [multi-gpu-docker, single-gpu-docker]
     runs-on: ${{ matrix.machines }}
@@ -210,6 +212,7 @@ jobs:
   run_all_tests_torch_cuda_extensions_gpu:
     name: Torch CUDA extension tests
     strategy:
+      fail-fast: false
       matrix:
         machines: [multi-gpu-docker, single-gpu-docker]
     runs-on: ${{ matrix.machines }}
