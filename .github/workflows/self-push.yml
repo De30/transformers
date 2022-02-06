@@ -34,7 +34,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Update clone
-        working-directory: transformers
+        working-directory: /transformers
         run: |
           ls
           ls -la
