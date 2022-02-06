@@ -34,7 +34,9 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Update clone
-        run: git fetch && git checkout ${{ github.sha }}
+        run: |
+          ls
+          git fetch && git checkout ${{ github.sha }}
 
       - name: Cleanup
         run: |
