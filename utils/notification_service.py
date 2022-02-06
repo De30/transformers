@@ -224,11 +224,11 @@ class Message:
     def post(self):
         print("Sending the following payload")
         print(json.dumps({"blocks": json.loads(self.payload)}))
-        # self.thread_ts = client.chat_postMessage(
-        #     channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
-        #     blocks=self.payload,
-        #     text=f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
-        # )
+        self.thread_ts = client.chat_postMessage(
+            channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
+            blocks=self.payload,
+            text=f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
+        )
 
     def get_reply_blocks(self, job_name, job_result, text):
         failures = job_result['failures']
