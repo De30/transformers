@@ -26,7 +26,7 @@ env:
 jobs:
   setup:
     name: Setup
-    runs-on: [self-hosted, multi-gpu-docker]
+    runs-on: [self-hosted, single-gpu-docker]
     container:
       image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
