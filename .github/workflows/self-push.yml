@@ -26,7 +26,7 @@ env:
 jobs:
   setup:
     name: Setup
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    runs-on: [self-hosted, multi-gpu-docker]
     container:
       image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -61,7 +61,7 @@ jobs:
 
   run_tests_gpu:
     name: Model tests
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    runs-on: [self-hosted, multi-gpu-docker]
     container:
       image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -95,7 +95,7 @@ jobs:
 
   run_examples_gpu:
     name: Examples directory
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    runs-on: [self-hosted, multi-gpu-docker]
     container:
       image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -124,7 +124,7 @@ jobs:
 
   run_pipelines_torch_gpu:
     name: PyTorch pipelines
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    runs-on: [self-hosted, multi-gpu-docker]
     container:
       image: huggingface/transformers-pytorch-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -154,7 +154,7 @@ jobs:
 
   run_pipelines_tf_gpu:
     name: TensorFlow pipelines
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    runs-on: [self-hosted, multi-gpu-docker]
     container:
       image: huggingface/transformers-tensorflow-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -188,7 +188,7 @@ jobs:
 
   run_all_tests_torch_cuda_extensions_gpu:
     name: Torch CUDA extension tests
-    runs-on: [self-hosted, docker-gpu-test2, single-gpu]
+    runs-on: [self-hosted, multi-gpu-docker]
     needs: setup
     container:
       image: huggingface/transformers-pytorch-latest-release-deepspeed-gpu
