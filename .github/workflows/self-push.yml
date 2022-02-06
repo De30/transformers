@@ -28,7 +28,7 @@ jobs:
     name: Setup
     strategy:
       matrix:
-        machines: [multi-gpu-docker, single-gpu-docker, self-hosted]
+        machines: [multi-gpu-docker, single-gpu-docker]
     runs-on: ${{ matrix.machines }}
     container:
       image: huggingface/transformers-all-latest-gpu
@@ -71,15 +71,16 @@ jobs:
 
   run_tests_gpu:
     name: Model tests
-    runs-on: [self-hosted, multi-gpu-docker]
-    container:
-      image: huggingface/transformers-all-latest-gpu
-      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
-    needs: setup
     strategy:
       fail-fast: false
       matrix:
         folders: ${{ fromJson(needs.setup.outputs.matrix) }}
+        machines: [multi-gpu-docker, single-gpu-docker]
+    runs-on: ${{ matrix.machines }}
+    container:
+      image: huggingface/transformers-all-latest-gpu
+      options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    needs: setup
     steps:
       - name: Echo folder ${{ matrix.folders }}
         run: echo "${{ matrix.folders }}"
@@ -135,7 +136,10 @@ jobs:
 
   run_pipelines_torch_gpu:
     name: PyTorch pipelines
-    runs-on: [self-hosted, multi-gpu-docker]
+    strategy:
+      matrix:
+        machines: [multi-gpu-docker, single-gpu-docker]
+    runs-on: ${{ matrix.machines }}
     container:
       image: huggingface/transformers-pytorch-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -166,7 +170,10 @@ jobs:
 
   run_pipelines_tf_gpu:
     name: TensorFlow pipelines
-    runs-on: [self-hosted, multi-gpu-docker]
+    strategy:
+      matrix:
+        machines: [multi-gpu-docker, single-gpu-docker]
+    runs-on: ${{ matrix.machines }}
     container:
       image: huggingface/transformers-tensorflow-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -202,7 +209,10 @@ jobs:
 
   run_all_tests_torch_cuda_extensions_gpu:
     name: Torch CUDA extension tests
-    runs-on: [self-hosted, multi-gpu-docker]
+    strategy:
+      matrix:
+        machines: [multi-gpu-docker, single-gpu-docker]
+    runs-on: ${{ matrix.machines }}
     needs: setup
     container:
       image: huggingface/transformers-pytorch-latest-release-deepspeed-gpu
