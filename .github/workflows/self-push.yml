@@ -90,6 +90,7 @@ jobs:
         run: git fetch && git checkout ${{ github.sha }}
 
       - name: Run all non-slow tests on GPU
+        working-directory: /transformers
         run: python3 -m pytest -v --make-reports=${{ matrix.machines }}_tests_gpu_${{ matrix.folders }} tests/${{ matrix.folders }}
 
       - name: Failure short reports
@@ -155,7 +156,7 @@ jobs:
         env:
           RUN_PIPELINE_TESTS: yes
         run: |
-          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports={{ matrix.machines }}_tests_torch_pipeline_gpu tests
+          python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=${{ matrix.machines }}_tests_torch_pipeline_gpu tests
 
       - name: Failure short reports
         if: ${{ failure() }}
