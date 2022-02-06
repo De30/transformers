@@ -26,7 +26,10 @@ env:
 jobs:
   setup:
     name: Setup
-    runs-on: [self-hosted, multi-gpu-docker]
+    strategy:
+      matrix:
+        machines: [multi-gpu-docker, single-gpu-docker, self-hosted]
+    runs-on: ${{ matrix.machines }}
     container:
       image: huggingface/transformers-all-latest-gpu
       options: --gpus 0 --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
@@ -58,6 +61,7 @@ jobs:
           nvidia-smi
 
       - name: GPU visibility
+        working-directory: /transformers
         run: |
           utils/print_env_pt.py
           TF_CPP_MIN_LOG_LEVEL=3 python3 -c "import tensorflow as tf; print('TF GPUs available:', bool(tf.config.list_physical_devices('GPU')))"
@@ -90,14 +94,14 @@ jobs:
       - name: Failure short reports
         if: ${{ failure() }}
         continue-on-error: true
-        run: cat reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
+        run: cat /transformers/reports/tests_gpu_${{ matrix.folders }}_failures_short.txt
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: run_all_tests_gpu_${{ matrix.folders }}_test_reports
-          path: reports/tests_gpu_${{ matrix.folders }}
+          path: /transformers/reports/tests_gpu_${{ matrix.folders }}
 
   run_examples_gpu:
     name: Examples directory
@@ -112,6 +116,7 @@ jobs:
         run: git fetch && git checkout ${{ github.sha }}
 
       - name: Run examples tests on GPU
+        working-directory: /transformers
         run: |
           pip install -r examples/pytorch/_tests_requirements.txt
           python3 -m pytest -v --make-reports=examples_gpu examples
@@ -119,14 +124,14 @@ jobs:
       - name: Failure short reports
         if: ${{ failure() }}
         continue-on-error: true
-        run: cat reports/examples_gpu
+        run: cat /transformers/reports/examples_gpu
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: run_examples_gpu
-          path: reports/examples_gpu
+          path: /transformers/reports/examples_gpu
 
   run_pipelines_torch_gpu:
     name: PyTorch pipelines
@@ -141,6 +146,7 @@ jobs:
         run: git fetch && git checkout ${{ github.sha }}
 
       - name: Run all pipeline tests on GPU
+        working-directory: /transformers
         env:
           RUN_PIPELINE_TESTS: yes
         run: |
@@ -149,14 +155,14 @@ jobs:
       - name: Failure short reports
         if: ${{ failure() }}
         continue-on-error: true
-        run: cat reports/tests_torch_pipeline_gpu
+        run: cat /transformers/reports/tests_torch_pipeline_gpu
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: run_tests_torch_pipeline_gpu
-          path: reports/tests_torch_pipeline_gpu
+          path: /transformers/reports/tests_torch_pipeline_gpu
 
   run_pipelines_tf_gpu:
     name: TensorFlow pipelines
@@ -172,12 +178,14 @@ jobs:
           git fetch && git checkout ${{ github.sha }}
 
       - name: Run all pipeline tests on GPU
+        working-directory: /transformers
         env:
           RUN_PIPELINE_TESTS: yes
         run: |
           python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=tests_tf_pipeline_gpu tests
 
       - name: Failure short reports
+        working-directory: /transformers
         if: ${{ always() }}
         run: |
           ls
@@ -190,7 +198,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: run_tests_tf_pipeline_gpu
-          path: reports/tests_tf_pipeline_gpu
+          path: /transformers/reports/tests_tf_pipeline_gpu
 
   run_all_tests_torch_cuda_extensions_gpu:
     name: Torch CUDA extension tests
@@ -212,7 +220,7 @@ jobs:
       - name: Failure short reports
         if: ${{ failure() }}
         continue-on-error: true
-        run: cat reports/tests_torch_cuda_extensions_gpu
+        run: cat /workspace/transformersreports/tests_torch_cuda_extensions_gpu
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
