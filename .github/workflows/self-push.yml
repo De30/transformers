@@ -42,13 +42,14 @@ jobs:
           git fetch && git checkout ${{ github.sha }}
 
       - name: Cleanup
+        working-directory: /transformers
         run: |
           rm -rf tests/__pycache__
           rm -rf reports
 
       - id: set-matrix
         name: Identify models to test
-        working-directory: tests
+        working-directory: /transformers/tests
         run: |
           echo "::set-output name=matrix::$(python3 -c 'import os; x = list(filter(os.path.isdir, os.listdir(os.getcwd()))); x.sort(); print(x[:10])')"
 
