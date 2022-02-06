@@ -36,6 +36,8 @@ jobs:
       - name: Update clone
         run: |
           ls
+          ls -la
+          ls /transformers
           git fetch && git checkout ${{ github.sha }}
 
       - name: Cleanup
