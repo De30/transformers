@@ -1260,7 +1260,7 @@ def pytest_terminal_summary_main(tr, id):
     dir = f"reports/{id}"
     Path(dir).mkdir(parents=True, exist_ok=True)
     report_files = {
-        k: f"{dir}/{id}_{k}.txt"
+        k: f"{dir}/{k}.txt"
         for k in [
             "durations",
             "errors",
