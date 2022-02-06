@@ -25,6 +25,7 @@ env:
 
 jobs:
   setup:
+    name: Setup
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/transformers-all-latest-gpu
@@ -59,6 +60,7 @@ jobs:
           python3 -c "import jax; print('Number of GPUs available:', len(jax.local_devices()))"
 
   run_tests_gpu:
+    name: Model tests
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/transformers-all-latest-gpu
@@ -92,6 +94,7 @@ jobs:
           path: reports/tests_gpu_${{ matrix.folders }}
 
   run_examples_gpu:
+    name: Examples directory
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/transformers-all-latest-gpu
@@ -120,6 +123,7 @@ jobs:
           path: reports/examples_gpu
 
   run_pipelines_torch_gpu:
+    name: PyTorch pipelines
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/transformers-pytorch-latest-gpu
@@ -149,6 +153,7 @@ jobs:
           path: reports/tests_torch_pipeline_gpu
 
   run_pipelines_tf_gpu:
+    name: TensorFlow pipelines
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     container:
       image: huggingface/transformers-tensorflow-latest-gpu
@@ -182,6 +187,7 @@ jobs:
           path: reports/tests_tf_pipeline_gpu
 
   run_all_tests_torch_cuda_extensions_gpu:
+    name: Torch CUDA extension tests
     runs-on: [self-hosted, docker-gpu-test2, single-gpu]
     needs: setup
     container:
@@ -214,7 +220,7 @@ jobs:
     name: Send results to webhook
     runs-on: ubuntu-latest
     if: always()
-    needs: [run_tests_gpu, run_examples_gpu, run_pipelines_tf_gpu, run_pipelines_torch_gpu, run_all_tests_torch_cuda_extensions_gpu]
+    needs: [setup, run_tests_gpu, run_examples_gpu, run_pipelines_tf_gpu, run_pipelines_torch_gpu, run_all_tests_torch_cuda_extensions_gpu]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
