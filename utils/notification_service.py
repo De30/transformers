@@ -515,7 +515,7 @@ if __name__ == "__main__":
             artifact = retrieve_artifact(artifact_path['name'], artifact_path['gpu'])
             if 'stats' in artifact:
                 # Link to the GitHub Action job
-                model_results[model]['job_link'] = github_actions_job_links.get(f"Model tests ({model})")
+                model_results[model]['job_link'] = github_actions_job_links.get(f"Model tests ({model}, {artifact_path['gpu']}-gpu-docker)")
 
                 failed, success, time_spent = handle_test_results(artifact['stats'])
                 model_results[model]["success"] += success
@@ -582,6 +582,8 @@ if __name__ == "__main__":
 
     for key in additional_results.keys():
         for artifact_path in available_artifacts[additional_files[key]].paths:
+            if artifact_path['gpu'] is not None:
+                additional_results[key]['job_link'] = github_actions_job_links.get(f"{key} ({artifact_path['gpu']}-gpu-docker)")
             artifact = retrieve_artifact(artifact_path['name'], artifact_path['gpu'])
             stacktraces = handle_stacktraces(artifact['failures_line'])
 
