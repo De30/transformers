@@ -630,4 +630,4 @@ if __name__ == "__main__":
     message = Message("🤗 Results of the scheduled tests.", model_results, additional_results)
 
     message.post()
-    # message.post_reply()
+    message.post_reply()
