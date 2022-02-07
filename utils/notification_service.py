@@ -199,11 +199,19 @@ class Message:
 
         individual_reports = []
         for key, value in category_failures.items():
-            device_report = ', '.join([f"{k}: {v}" for k, v in value.items() if v and k in ['single', 'multi']])
+            if 'single' in value and 'multi' in value:
+                device_report = f"{value['single']}/{value['multi']}"
+            elif 'single' in value:
+                device_report = f"{value['single']}/0"
+            elif 'multi' in value:
+                device_report = f"0/{value['multi']}"
+            else:
+                device_report = None
+
             if sum(value.values()):
                 report = f"*{key}*: {sum(value.values())}"
                 if device_report:
-                    report += f" (with {device_report})"
+                    report = f"{report} [{device_report}]"
 
                 individual_reports.append(report)
 
@@ -213,7 +221,7 @@ class Message:
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"The following modeling categories had failures:\n{category_failures_report}"
+                "text": f"The following modeling categories had failures [single/multi]:\n{category_failures_report}"
             }
         }
 
@@ -227,11 +235,19 @@ class Message:
 
         individual_reports = []
         for key, value in failures.items():
-            device_report = ', '.join([f"{k}: {v}" for k, v in value.items() if v and k in ['single', 'multi']])
+            if 'single' in value and 'multi' in value:
+                device_report = f"{value['single']}/{value['multi']}"
+            elif 'single' in value:
+                device_report = f"{value['single']}/0"
+            elif 'multi' in value:
+                device_report = f"0/{value['multi']}"
+            else:
+                device_report = None
+
             if sum(value.values()):
                 report = f"*{key}*: {sum(value.values())}"
                 if device_report:
-                    report += f" (with {device_report})"
+                    report = f"{report} [{device_report}]"
 
                 individual_reports.append(report)
 
@@ -241,7 +257,7 @@ class Message:
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"These following model modules had failures:\n{model_failures_report}"
+                "text": f"These following model modules had failures [single/multi]:\n{model_failures_report}"
             }
         }
 
@@ -251,11 +267,19 @@ class Message:
 
         individual_reports = []
         for key, value in failures.items():
-            device_report = ', '.join([f"{k}: {v}" for k, v in value.items() if v and k in ['single', 'multi']])
+            if 'single' in value and 'multi' in value:
+                device_report = f"{value['single']}/{value['multi']}"
+            elif 'single' in value:
+                device_report = f"{value['single']}/0"
+            elif 'multi' in value:
+                device_report = f"0/{value['multi']}"
+            else:
+                device_report = None
+
             if sum(value.values()):
                 report = f"*{key}*: {sum(value.values())}"
                 if device_report:
-                   report += f" (with {device_report})"
+                    report = f"{report} [{device_report}]"
 
                 individual_reports.append(report)
 
@@ -265,7 +289,7 @@ class Message:
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"The following non-modeling tests had failures:\n{failures_report}"
+                "text": f"The following non-modeling tests had failures [single/multi]:\n{failures_report}"
             }
         }
 
@@ -606,4 +630,4 @@ if __name__ == "__main__":
     message = Message("🤗 Results of the scheduled tests.", model_results, additional_results)
 
     message.post()
-    message.post_reply()
+    # message.post_reply()
