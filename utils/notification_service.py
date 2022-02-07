@@ -14,11 +14,13 @@
 import ast
 import collections
 import functools
+import math
 import operator
 import os
 import re
 import sys
 import json
+import time
 
 import requests
 from slack_sdk import WebClient
@@ -56,10 +58,14 @@ def handle_stacktraces(test_results):
     total_stacktraces = test_results.split('\n')[1:-1]
     stacktraces = []
     for stacktrace in total_stacktraces:
-        line = stacktrace[:stacktrace.index(' ')].split(':')[-2]
-        error_message = stacktrace[stacktrace.index(' '):]
+        try:
+            line = stacktrace[:stacktrace.index(' ')].split(':')[-2]
+            error_message = stacktrace[stacktrace.index(' '):]
 
-        stacktraces.append(f"(line {line}) {error_message}")
+            stacktraces.append(f"(line {line}) {error_message}")
+        except Exception:
+            stacktraces.append("Cannot retrieve error message.")
+
 
     return stacktraces
 
@@ -357,6 +363,8 @@ class Message:
                         thread_ts=self.thread_ts["ts"]
                     )
 
+                    time.sleep(1)
+
         for job, job_result in self.additional_results.items():
             if len(job_result["failures"]):
                 for device, failures in job_result['failures'].items():
@@ -372,13 +380,24 @@ class Message:
                         thread_ts=self.thread_ts["ts"]
                     )
 
+                    time.sleep(1)
+
 
 def get_job_links():
     run_id = os.environ['GITHUB_RUN_ID']
-    result = requests.get(f"https://api.github.com/repos/huggingface/transformers/actions/runs/{run_id}/jobs").json()
+    url = f"https://api.github.com/repos/huggingface/transformers/actions/runs/{run_id}/jobs?per_page=100"
+    result = requests.get(url).json()
+    jobs = {}
 
     try:
-        return {job['name']: job['html_url'] for job in result['jobs']}
+        jobs.update({job['name']: job['html_url'] for job in result['jobs']})
+        pages_to_iterate_over = math.ceil((result['total_count'] - 100) / 100)
+
+        for i in range(pages_to_iterate_over):
+            result = requests.get(url + f"&page={i + 2}").json()
+            jobs.update({job['name']: job['html_url'] for job in result['jobs']})
+
+        return jobs
     except Exception as e:
         print("Unknown error, could not fetch links.", e)
 
@@ -397,8 +416,11 @@ def retrieve_artifact(name: str, gpu: Optional[str]):
     if os.path.exists(name):
         files = os.listdir(name)
         for file in files:
-            with open(os.path.join(name, file)) as f:
-                _artifact[file.split('.')[0]] = f.read()
+            try:
+                with open(os.path.join(name, file)) as f:
+                    _artifact[file.split('.')[0]] = f.read()
+            except UnicodeDecodeError as e:
+                raise ValueError(f"Could not open {os.path.join(name, file)}.") from e
 
     return _artifact
 

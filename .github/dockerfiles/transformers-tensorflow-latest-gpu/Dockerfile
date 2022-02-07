@@ -9,7 +9,7 @@ RUN apt install -y git libsndfile1-dev tesseract-ocr espeak-ng python3 python3-p
 RUN git clone https://github.com/huggingface/transformers
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip
-RUN python3 -m pip install --no-cache-dir -e ./transformers[dev]
+RUN python3 -m pip install --no-cache-dir -e ./transformers[dev,onnxruntime]
 RUN python3 -m pip install --no-cache-dir -U tensorflow~=2.7
 RUN python3 -m pip uninstall -y torch flax
 

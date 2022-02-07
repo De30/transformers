@@ -195,10 +195,9 @@ jobs:
           python3 -m pytest -n 1 -v --dist=loadfile -m is_pipeline_test --make-reports=${{ matrix.machines }}_tests_tf_pipeline_gpu tests
 
       - name: Failure short reports
-        working-directory: /transformers
         if: ${{ always() }}
         run: |
-          cat reports/tests_tf_pipeline_gpu/${{ matrix.machines }}_tests_tf_pipeline_gpu/failures_short.txt
+          cat /transformers/reports/${{ matrix.machines }}_tests_tf_pipeline_gpu/failures_short.txt
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
@@ -231,7 +230,7 @@ jobs:
       - name: Failure short reports
         if: ${{ failure() }}
         continue-on-error: true
-        run: cat /workspace/transformersreports/${{ matrix.machines }}_tests_torch_cuda_extensions_gpu/failures_short.txt
+        run: cat /workspace/transformers/reports/${{ matrix.machines }}_tests_torch_cuda_extensions_gpu/failures_short.txt
 
       - name: Test suite reports artifacts
         if: ${{ always() }}
