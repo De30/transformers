@@ -311,6 +311,14 @@ class Message:
 
         return json.dumps(blocks)
 
+    @staticmethod
+    def error_out():
+        client.chat_postMessage(
+            channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
+            text="There was an issue running the tests."
+        )
+
+
     def post(self):
         print("Sending the following payload")
         print(json.dumps({"blocks": json.loads(self.payload)}))
@@ -498,7 +506,11 @@ def retrieve_available_artifacts():
 
 if __name__ == "__main__":
     arguments = sys.argv[1:][0]
-    models = ast.literal_eval(arguments)
+    try:
+        models = ast.literal_eval(arguments)
+    except SyntaxError:
+        Message.error_out()
+
 
     if len(models) == 0:
         models = [a.split("/")[-1] for a in list(filter(os.path.isdir, (os.path.join("/home/lysandre/transformers/tests", f) for f in os.listdir("/home/lysandre/transformers/tests"))))]
