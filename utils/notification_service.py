@@ -313,6 +313,28 @@ class Message:
 
     @staticmethod
     def error_out():
+        payload = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "plain_text",
+                    "text": "There was an issue running the tests.",
+                },
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Check Action results",
+                        "emoji": True
+                    },
+                    "url": f"https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+                }
+            }
+        ]
+
+        print("Sending the following payload")
+        print(json.dumps({"blocks": json.loads(payload)}))
+
         client.chat_postMessage(
             channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
             text="There was an issue running the tests."
@@ -510,6 +532,7 @@ if __name__ == "__main__":
         models = ast.literal_eval(arguments)
     except SyntaxError:
         Message.error_out()
+        raise ValueError("Errored out.")
 
 
     if len(models) == 0:
