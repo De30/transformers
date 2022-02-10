@@ -14,6 +14,8 @@ on:
       - "templates/**"
       - "utils/**"
   repository_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
 
 env:
   HF_HOME: /mnt/cache
