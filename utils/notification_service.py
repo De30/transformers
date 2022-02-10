@@ -337,7 +337,8 @@ class Message:
 
         client.chat_postMessage(
             channel=os.environ["CI_SLACK_CHANNEL_DUMMY_TESTS"],
-            text="There was an issue running the tests."
+            text="There was an issue running the tests.",
+            blocks=payload
         )
 
 
