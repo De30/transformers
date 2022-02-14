@@ -32,7 +32,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: docker/transformers-all-latest-gpu
+          context: ./docker/transformers-all-latest-gpu
           build-args: REF=master
           push: true
           tags: huggingface/dummy-image
