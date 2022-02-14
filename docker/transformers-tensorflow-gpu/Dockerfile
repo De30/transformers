@@ -14,8 +14,7 @@ RUN python3 -m pip install --no-cache-dir -e ./transformers[dev,onnxruntime]
 # If set to nothing, will install the latest version
 ARG TENSORFLOW=''
 
-RUN python3 -m pip install --no-cache-dir -e ./transformers[dev,onnxruntime]
-RUN VERSION=[ ${#TENSORFLOW} -gt 0 ] && VERSION='tensorflow~='$TENSORFLOW ||  VERSION='tensorflow'; python3 -m pip install --no-cache-dir -U $VERSION
+RUN VERSION=[ ${#TENSORFLOW} -gt 0 ] && VERSION='tensorflow=='$TENSORFLOW ||  VERSION='tensorflow'; python3 -m pip install --no-cache-dir -U $VERSION
 RUN python3 -m pip uninstall -y torch flax
 
 # When installing in editable mode, `transformers` is not recognized as a package.
