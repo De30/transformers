@@ -5,12 +5,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update
 RUN apt install -y git libsndfile1-dev tesseract-ocr espeak-ng python3 python3-pip
-
-RUN git clone https://github.com/huggingface/transformers
-
 RUN python3 -m pip install --no-cache-dir --upgrade pip
+
+ARG REF=master
+RUN git clone https://github.com/huggingface/transformers && cd transformers && git checkout $REF
 RUN python3 -m pip install --no-cache-dir -e ./transformers[dev,onnxruntime]
-RUN python3 -m pip install --no-cache-dir -U torch~=1.10
+
+# If set to nothing, will install the latest version
+ARG PYTORCH=''
+
+RUN python3 -m pip install --no-cache-dir -e ./transformers[dev,onnxruntime]
+RUN VERSION=[ ${#PYTORCH} -gt 0 ] && VERSION='torch~='$PYTORCH ||  VERSION='torch'; python3 -m pip install --no-cache-dir -U $VERSION
 RUN python3 -m pip uninstall -y tensorflow flax
 
 RUN python3 -m pip install --no-cache-dir torch-scatter -f https://data.pyg.org/whl/torch-$(python3 -c "from torch import version; print(version.__version__.split('+')[0])")+cpu.html

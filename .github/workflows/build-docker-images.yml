@@ -18,6 +18,9 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pytorch: [1.8, 1.9, 1.10]
     steps:
       -
         name: Set up Docker Buildx
@@ -35,7 +38,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: ./docker/transformers-all-latest-gpu
-          build-args: REF=master
+          context: ./docker/transformers-pytorch-gpu
+          build-args: REF=master,TORCH=${{ matrix.pytorch }}
           push: true
-          tags: huggingface/dummy-image
+          tags: huggingface/dummy-${{ matrix.pytorch }}-transformers
