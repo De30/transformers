@@ -14,7 +14,7 @@ RUN python3 -m pip install --no-cache-dir -e ./transformers[dev,onnxruntime]
 # If set to nothing, will install the latest version
 ARG PYTORCH=''
 
-RUN VERSION=[ ${#PYTORCH} -gt 0 ] && VERSION='torch=='$PYTORCH ||  VERSION='torch'; python3 -m pip install --no-cache-dir -U $VERSION
+RUN [ ${#PYTORCH} -gt 0 ] && VERSION='torch=='$PYTORCH'.*' ||  VERSION='torch'; python3 -m pip install --no-cache-dir -U $VERSION
 RUN python3 -m pip uninstall -y tensorflow flax
 
 RUN python3 -m pip install --no-cache-dir torch-scatter -f https://data.pyg.org/whl/torch-$(python3 -c "from torch import version; print(version.__version__.split('+')[0])")+cpu.html
