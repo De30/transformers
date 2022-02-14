@@ -16,11 +16,12 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  docker:
+  torch-docker:
+    name: PyTorch docker container build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pytorch: [1.8, 1.9, 1.10]
+        pytorch: ["1.8", "1.9", "1.10"]
     steps:
       -
         name: Set up Docker Buildx
@@ -39,6 +40,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./docker/transformers-pytorch-gpu
-          build-args: REF=master,TORCH=${{ matrix.pytorch }}
+          build-args: |
+            REF=master
+            TORCH=${{ matrix.pytorch }}
           push: true
           tags: huggingface/dummy-${{ matrix.pytorch }}-transformers
