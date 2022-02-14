@@ -195,12 +195,18 @@ def get_test_dependencies(test_fname):
         content = f.read()
 
     # Tests only have relative imports for other test files
-    relative_imports = re.findall(r"from\s+\.(\S+)\s+import\s+([^\n]+)\n", content)
+    # TODO Sylvain: handle relative imports cleanly
+    relative_imports = re.findall(r"from\s+(\.\S+)\s+import\s+([^\n]+)\n", content)
     relative_imports = [test for test, imp in relative_imports if "# tests_ignore" not in imp]
-    dependencies = [os.path.join("tests", f"{test}.py") for test in relative_imports]
-    # Some tests use docstrings with relative imports in them and this could catch them, so we check the files
-    # actually exist
-    return [f for f in dependencies if os.path.isfile(f)]
+
+    parent_imports = [imp.strip('.') for imp in relative_imports if '..' in imp]
+    parent_imports = [os.path.join("tests", f"{test.replace('.', '/')}.py") for test in parent_imports]
+
+    current_dir_imports = [imp.strip('.') for imp in relative_imports if '..' not in imp]
+    directory = re.findall(r"(.*)[/]", test_fname)[0]
+    current_dir_imports = [os.path.join(directory, f"{test.replace('.', '/')}.py") for test in current_dir_imports]
+
+    return [*parent_imports, *current_dir_imports]
 
 
 def create_reverse_dependency_map():
@@ -227,6 +233,8 @@ def create_reverse_dependency_map():
         something_changed = False
         for m in all_files:
             for d in direct_deps[m]:
+                if d not in direct_deps:
+                    raise ValueError(f"KeyError:{d}. From {m}")
                 for dep in direct_deps[d]:
                     if dep not in direct_deps[m]:
                         direct_deps[m].append(dep)
@@ -295,6 +303,9 @@ def module_to_test_file(module_fname):
     Returns the name of the file(s) where `module_fname` is tested.
     """
     splits = module_fname.split(os.path.sep)
+
+    if "__init__.py" in splits:
+        return
 
     # Special map has priority
     short_name = os.path.sep.join(splits[2:])
@@ -496,6 +507,7 @@ if __name__ == "__main__":
             infer_tests_to_run(args.output_file, diff_with_last_commit=diff_with_last_commit, filters=args.filters)
         except Exception as e:
             print(f"\nError when trying to grab the relevant tests: {e}\n\nRunning all tests.")
+            raise e
             with open(args.output_file, "w", encoding="utf-8") as f:
                 if args.filters is None:
                     f.write("./tests/")
