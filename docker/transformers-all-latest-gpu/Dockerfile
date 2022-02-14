@@ -11,10 +11,7 @@ ARG REF=master
 RUN git clone https://github.com/huggingface/transformers && cd transformers && git checkout $REF
 RUN python3 -m pip install --no-cache-dir -e ./transformers[dev,onnxruntime]
 
-ARG TORCH=1.10
-ARG TENSORFLOW=2.7
-RUN python3 -m pip install --no-cache-dir -U torch~=$TORCH tensorflow~=$TENSORFLOW flax
-
+RUN python3 -m pip install --no-cache-dir -U torch tensorflow flax
 RUN python3 -m pip install --no-cache-dir torch-scatter -f https://data.pyg.org/whl/torch-$(python3 -c "from torch import version; print(version.__version__.split('+')[0])")+cpu.html
 RUN python3 -m pip install --no-cache-dir git+https://github.com/facebookresearch/detectron2.git pytesseract https://github.com/kpu/kenlm/archive/master.zip
 
