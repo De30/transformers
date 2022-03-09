@@ -99,36 +99,6 @@ The [`pipeline`] can also iterate over an entire dataset. Start by installing th
 pip install datasets 
 ```
 
-Create a [`pipeline`] with the task you want to solve for and the model you want to use.
-
-```py
->>> import torch
->>> from transformers import pipeline
-
->>> speech_recognizer = pipeline("automatic-speech-recognition", model="facebook/wav2vec2-base-960h")
-```
-
-Next, load a dataset (see the 🤗 Datasets [Quick Start](https://huggingface.co/docs/datasets/quickstart.html) for more details) you'd like to iterate over. For example, let's load the [SUPERB](https://huggingface.co/datasets/superb) dataset:
-
-```py
->>> import datasets
-
->>> dataset = datasets.load_dataset("superb", name="asr", split="test")  # doctest: +IGNORE_RESULT
-```
-
-You can pass a whole dataset pipeline:
-
-```py
->>> files = dataset["file"]
->>> speech_recognizer(files[:4])
-[{'text': 'HE HOPED THERE WOULD BE STEW FOR DINNER TURNIPS AND CARROTS AND BRUISED POTATOES AND FAT MUTTON PIECES TO BE LADLED OUT IN THICK PEPPERED FLOWER FAT AND SAUCE'},
- {'text': 'STUFFERED INTO YOU HIS BELLY COUNSELLED HIM'},
- {'text': 'AFTER EARLY NIGHTFALL THE YELLOW LAMPS WOULD LIGHT UP HERE AND THERE THE SQUALID QUARTER OF THE BROTHELS'},
- {'text': 'HO BERTIE ANY GOOD IN YOUR MIND'}]
-```
-
-For a larger dataset where the inputs are big (like in speech or vision), you will want to pass along a generator instead of a list that loads all the inputs in memory. See the [pipeline documentation](./main_classes/pipelines) for more information.
-
 ### Use another model and tokenizer in the pipeline
 
 The [`pipeline`] can accommodate any model from the [Model Hub](https://huggingface.co/models), making it easy to adapt the [`pipeline`] for other use-cases. For example, if you'd like a model capable of handling French text, use the tags on the Model Hub to filter for an appropriate model. The top filtered result returns a multilingual [BERT model](https://huggingface.co/nlptown/bert-base-multilingual-uncased-sentiment) fine-tuned for sentiment analysis. Great, let's use this model!
