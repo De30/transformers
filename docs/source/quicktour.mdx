@@ -228,14 +228,14 @@ The model outputs the final activations in the `logits` attribute. Apply the sof
 
 >>> pt_predictions = nn.functional.softmax(pt_outputs.logits, dim=-1)
 >>> print(pt_predictions)
-tensor([[0.0021, 0.0018, 0.0115, 0.2121, 0.7725],
+tensor([[0.0021, 0.0018, 0.01, 0.2121, 0.7725],
         [0.2084, 0.1826, 0.1969, 0.1755, 0.2365]], grad_fn=<SoftmaxBackward0>)
 
 >>> # ===PT-TF-SPLIT===
 >>> import tensorflow as tf
 
 >>> tf_predictions = tf.nn.softmax(tf_outputs.logits, axis=-1)
->>> print(tf.math.round(tf_predictions * 10**4) / 10**4)
+>>> print(tf_predictions)
 tf.Tensor(
 [[0.0021 0.0018 0.0116 0.2121 0.7725]
  [0.2084 0.1826 0.1969 0.1755 0.2365]], shape=(2, 5), dtype=float32)
