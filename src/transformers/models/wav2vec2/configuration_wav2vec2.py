@@ -16,8 +16,11 @@
 
 import functools
 import operator
+from collections import OrderedDict
+from typing import Mapping
 
 from ...configuration_utils import PretrainedConfig
+from ...onnx import OnnxConfig
 from ...utils import logging
 
 
@@ -336,3 +339,13 @@ class Wav2Vec2Config(PretrainedConfig):
     @property
     def inputs_to_logits_ratio(self):
         return functools.reduce(operator.mul, self.conv_stride, 1)
+
+
+class Wav2Vec2OnnxConfig(OnnxConfig):
+    @property
+    def inputs(self) -> Mapping[str, Mapping[int, str]]:
+        return OrderedDict([("input_values", {0: "batch", 1: "sequence"})])
+
+    @property
+    def atol_for_validation(self) -> float:
+        return 5e-4

@@ -136,6 +136,7 @@ def export_pytorch(
             # Ensure inputs match
             # TODO: Check when exporting QA we provide "is_pair=True"
             model_inputs = config.generate_dummy_inputs(preprocessor, framework=TensorType.PYTORCH)
+            print(model_inputs.keys())
             inputs_match, matched_inputs = ensure_model_and_config_inputs_match(model, model_inputs.keys())
             onnx_outputs = list(config.outputs.keys())
 

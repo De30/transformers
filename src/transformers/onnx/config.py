@@ -28,6 +28,7 @@ from .utils import ParameterFormat, compute_effective_axis_dimension, compute_se
 if TYPE_CHECKING:
     from ..configuration_utils import PretrainedConfig
     from ..feature_extraction_utils import FeatureExtractionMixin
+    from ..processing_utils import ProcessorMixin
     from ..tokenization_utils_base import PreTrainedTokenizerBase
 
 
@@ -73,12 +74,10 @@ class OnnxConfig(ABC):
     default_fixed_sequence = 8
     torch_onnx_minimum_version = version.parse("1.8")
     _tasks_to_common_outputs = {
-        "default": OrderedDict({"last_hidden_state": {0: "batch", 1: "sequence"}}),
-        "masked-lm": OrderedDict({"logits": {0: "batch", 1: "sequence"}}),
         "causal-lm": OrderedDict({"logits": {0: "batch", 1: "sequence"}}),
-        "seq2seq-lm": OrderedDict({"logits": {0: "batch", 1: "decoder_sequence"}}),
-        "sequence-classification": OrderedDict({"logits": {0: "batch"}}),
-        "token-classification": OrderedDict({"logits": {0: "batch", 1: "sequence"}}),
+        "default": OrderedDict({"last_hidden_state": {0: "batch", 1: "sequence"}}),
+        "image-classification": OrderedDict({"logits": {0: "batch", 1: "sequence"}}),
+        "masked-lm": OrderedDict({"logits": {0: "batch", 1: "sequence"}}),
         "multiple-choice": OrderedDict({"logits": {0: "batch"}}),
         "question-answering": OrderedDict(
             {
@@ -86,7 +85,9 @@ class OnnxConfig(ABC):
                 "end_logits": {0: "batch", 1: "sequence"},
             }
         ),
-        "image-classification": OrderedDict({"logits": {0: "batch", 1: "sequence"}}),
+        "seq2seq-lm": OrderedDict({"logits": {0: "batch", 1: "decoder_sequence"}}),
+        "sequence-classification": OrderedDict({"logits": {0: "batch"}}),
+        "token-classification": OrderedDict({"logits": {0: "batch", 1: "sequence"}}),
     }
 
     def __init__(self, config: "PretrainedConfig", task: str = "default", patching_specs: List[PatchingSpec] = None):
@@ -226,6 +227,17 @@ class OnnxConfig(ABC):
             >= EXTERNAL_DATA_FORMAT_SIZE_LIMIT
         )
 
+    def _generate_dummy_audio(self, batch_size):
+        from datasets import load_dataset
+
+        ds = load_dataset("hf-internal-testing/librispeech_asr_dummy", "clean", split="validation")
+        # automatic decoding with librispeech
+        speech_samples = ds.sort("id").filter(lambda x: x["id"] in [f"1272-141231-000{i}" for i in range(batch_size)])[
+            :batch_size
+        ]["audio"]
+
+        return [x["array"] for x in speech_samples]
+
     def _generate_dummy_images(
         self, batch_size: int = 2, num_channels: int = 3, image_height: int = 40, image_width: int = 40
     ):
@@ -237,7 +249,7 @@ class OnnxConfig(ABC):
 
     def generate_dummy_inputs(
         self,
-        preprocessor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"],
+        preprocessor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin", "ProcessorMixin"],
         batch_size: int = -1,
         seq_length: int = -1,
         is_pair: bool = False,
@@ -272,6 +284,7 @@ class OnnxConfig(ABC):
             Mapping[str, Tensor] holding the kwargs to provide to the model's forward function
         """
         from ..feature_extraction_utils import FeatureExtractionMixin
+        from ..processing_utils import ProcessorMixin
         from ..tokenization_utils_base import PreTrainedTokenizerBase
 
         if isinstance(preprocessor, PreTrainedTokenizerBase) and tokenizer is not None:
@@ -296,6 +309,16 @@ class OnnxConfig(ABC):
             # Generate dummy inputs according to compute batch and sequence
             dummy_input = [" ".join([preprocessor.unk_token]) * seq_length] * batch_size
             return dict(preprocessor(dummy_input, return_tensors=framework))
+        elif (
+            isinstance(preprocessor, ProcessorMixin)
+            and preprocessor.feature_extractor.model_input_names[0] == "input_values"
+        ):
+            # If dynamic axis (-1) we forward with a fixed dimension of 2 samples to avoid optimizations made by ONNX
+            batch_size = compute_effective_axis_dimension(batch_size, fixed_dimension=OnnxConfig.default_fixed_batch)
+            dummy_input = self._generate_dummy_audio(batch_size)
+            return dict(
+                preprocessor(raw_speech=dummy_input, return_tensors=framework, padding=True, sampling_rate=16_000)
+            )
         elif isinstance(preprocessor, FeatureExtractionMixin) and preprocessor.model_input_names[0] == "pixel_values":
             # If dynamic axis (-1) we forward with a fixed dimension of 2 samples to avoid optimizations made by ONNX
             batch_size = compute_effective_axis_dimension(batch_size, fixed_dimension=OnnxConfig.default_fixed_batch)

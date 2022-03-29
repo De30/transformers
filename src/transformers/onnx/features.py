@@ -22,6 +22,7 @@ from ..models.mbart import MBartOnnxConfig
 from ..models.roberta import RobertaOnnxConfig
 from ..models.t5 import T5OnnxConfig
 from ..models.vit import ViTOnnxConfig
+from ..models.wav2vec2 import Wav2Vec2OnnxConfig
 from ..models.xlm_roberta import XLMRobertaOnnxConfig
 from ..utils import logging
 from .config import OnnxConfig
@@ -287,6 +288,10 @@ class FeaturesManager:
             "seq2seq-lm",
             "seq2seq-lm-with-past",
             onnx_config_cls=BlenderbotSmallOnnxConfig,
+        ),
+        "wav2vec2": supported_features_mapping(
+            "default",
+            onnx_config_cls=Wav2Vec2OnnxConfig,
         ),
     }
 

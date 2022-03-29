@@ -15,8 +15,9 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-from ..models.auto import AutoConfig, AutoFeatureExtractor, AutoTokenizer
+from ..models.auto import AutoConfig, AutoFeatureExtractor, AutoProcessor, AutoTokenizer
 from ..models.auto.feature_extraction_auto import FEATURE_EXTRACTOR_MAPPING_NAMES
+from ..models.auto.processing_auto import PROCESSOR_MAPPING_NAMES
 from ..models.auto.tokenization_auto import TOKENIZER_MAPPING_NAMES
 from ..utils import logging
 from .convert import export, validate_model_outputs
@@ -54,7 +55,9 @@ def main():
     # Check the modality of the inputs and instantiate the appropriate preprocessor
     # TODO(lewtun): Refactor this as a function if we need to check modalities elsewhere as well
     config = AutoConfig.from_pretrained(args.model)
-    if config.model_type in TOKENIZER_MAPPING_NAMES:
+    if config.model_type in PROCESSOR_MAPPING_NAMES:
+        preprocessor = AutoProcessor.from_pretrained(args.model)
+    elif config.model_type in TOKENIZER_MAPPING_NAMES:
         preprocessor = AutoTokenizer.from_pretrained(args.model)
     elif config.model_type in FEATURE_EXTRACTOR_MAPPING_NAMES:
         preprocessor = AutoFeatureExtractor.from_pretrained(args.model)
