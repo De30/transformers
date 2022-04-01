@@ -33,6 +33,7 @@ logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 if is_torch_available():
     from transformers.models.auto import (
         AutoModel,
+        AutoModelForAudioClassification,
         AutoModelForCausalLM,
         AutoModelForImageClassification,
         AutoModelForMaskedLM,
@@ -40,6 +41,7 @@ if is_torch_available():
         AutoModelForQuestionAnswering,
         AutoModelForSeq2SeqLM,
         AutoModelForSequenceClassification,
+        AutoModelForSpeechSeq2Seq,
         AutoModelForTokenClassification,
     )
 if is_tf_available():
@@ -100,6 +102,8 @@ class FeaturesManager:
             "multiple-choice": AutoModelForMultipleChoice,
             "question-answering": AutoModelForQuestionAnswering,
             "image-classification": AutoModelForImageClassification,
+            "audio-classification": AutoModelForAudioClassification,
+            "seq2seq-speech": AutoModelForSpeechSeq2Seq,
         }
     if is_tf_available():
         _TASKS_TO_TF_AUTOMODELS = {
@@ -291,6 +295,8 @@ class FeaturesManager:
         ),
         "wav2vec2": supported_features_mapping(
             "default",
+            "audio-classification",
+            "seq2seq-speech",
             onnx_config_cls=Wav2Vec2OnnxConfig,
         ),
     }
