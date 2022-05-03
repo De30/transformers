@@ -718,7 +718,6 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
     main_input_name = "input_ids"
     _auto_class = None
     _using_dummy_loss = None
-    _loss_as_dict = None
 
     # a list of re pattern of tensor names to ignore from the model when loading the model weights
     # (and avoid unnecessary warnings).
@@ -913,10 +912,8 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
             self._using_dummy_loss = True
         elif isinstance(loss, dict):
             self._using_dummy_loss = False
-            self._loss_as_dict = True
         else:
             self._using_dummy_loss = False
-            self._loss_as_dict = False
         parent_args = list(inspect.signature(tf.keras.Model.compile).parameters.keys())
         if "steps_per_execution" in parent_args:
             super().compile(
