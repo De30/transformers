@@ -194,6 +194,7 @@ class TFQuestionAnsweringLoss:
     """
     Loss function suitable for question answering.
     """
+
     _input_to_label_mapping = {"start_positions": "start_logits", "end_positions": "end_logits"}
 
     def hf_compute_loss(self, labels, logits):
@@ -958,8 +959,8 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
         """
         A modification of Keras's default `train_step` that correctly handles matching outputs to labels for our models
         and supports directly training on the loss output head. In addition, it ensures input keys are copied to the
-        labels where appropriate. It will also copy label keys into the input dict when using the dummy loss, to
-        ensure that they are available to the model during the forward pass.
+        labels where appropriate. It will also copy label keys into the input dict when using the dummy loss, to ensure
+        that they are available to the model during the forward pass.
         """
 
         # For now, we hardcode the most common renamings - this will hopefully be expanded to model-specific
@@ -1021,7 +1022,7 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
                     y_pred = y_pred.to_tuple()[1:]
                 else:
                     y_pred = y_pred.to_tuple()
-                y_pred = y_pred[:len(y)]  # Remove unused fields in case those cause problems
+                y_pred = y_pred[: len(y)]  # Remove unused fields in case those cause problems
                 loss = self.compiled_loss(y, y_pred, sample_weight, regularization_losses=self.losses)
             else:
                 # If the labels are a single tensor, match them to the first non-loss tensor in the output
@@ -1051,8 +1052,8 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
         """
         A modification of Keras's default `train_step` that correctly handles matching outputs to labels for our models
         and supports directly training on the loss output head. In addition, it ensures input keys are copied to the
-        labels where appropriate. It will also copy label keys into the input dict when using the dummy loss, to
-        ensure that they are available to the model during the forward pass.
+        labels where appropriate. It will also copy label keys into the input dict when using the dummy loss, to ensure
+        that they are available to the model during the forward pass.
         """
         # For now, we hardcode the most common renamings - this will hopefully be expanded to model-specific
         # attributes in future.
@@ -1112,7 +1113,7 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
                 y_pred = y_pred.to_tuple()[1:]
             else:
                 y_pred = y_pred.to_tuple()
-            y_pred = y_pred[:len(y)]  # Remove unused fields in case those cause problems
+            y_pred = y_pred[: len(y)]  # Remove unused fields in case those cause problems
             loss = self.compiled_loss(y, y_pred, sample_weight, regularization_losses=self.losses)
         else:
             # If the labels are a single tensor, match them to the first non-loss tensor in the output
