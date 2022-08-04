@@ -26,7 +26,7 @@ jobs:
     name: Setup
     strategy:
       matrix:
-        machine_type: [single-gpu, multi-gpu]
+        machine_type: [single-gpu]
     runs-on: ${{ format('{0}-{1}', matrix.machine_type, 'docker-past-ci') }}
     container:
       image: huggingface/transformers-all-latest-gpu
