@@ -208,6 +208,8 @@ def parse_args():
 
 
 def main():
+    raise ValueError("haha")
+
     args = parse_args()
     # Sending telemetry. Tracking the example usage helps us better allocate resources to maintain them. The
     # information sent is the one passed as arguments along with your Python/PyTorch versions.
