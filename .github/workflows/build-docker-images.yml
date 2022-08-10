@@ -3,7 +3,7 @@ name: Build docker images (scheduled)
 on:
   push:
     branches:
-      - integration-8bit
+      - any_other_branch 
 
 concurrency:
   group: docker-images-builds
