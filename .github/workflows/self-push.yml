@@ -34,7 +34,6 @@ jobs:
         # `CI_SHA_WORKFLOW_RUN`: The commit SHA that triggers this workflow by `workflow_run` event
         # `CI_SHA`: The non-empty commit SHA from the above two (one and only one of them is empty)
         run: |
-          bonjourxxxx
           CI_BRANCH_PUSH=${{ github.event.ref }}
           CI_BRANCH_PUSH=${CI_BRANCH_PUSH/'refs/heads/'/''}
           CI_BRANCH_WORKFLOW_RUN=${{ github.event.workflow_run.head_branch }}
@@ -114,7 +113,7 @@ jobs:
     steps:
       - name: NVIDIA-SMI
         run: |
-          nvidia-smisss
+          nvidia-smi
 
   run_tests_single_gpu:
     name: Model tests
