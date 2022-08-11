@@ -397,7 +397,7 @@ class Message:
 
         blocks = []
         title_block = {"type": "header", "text": {"type": "plain_text", "text": title}}
-        block.append(title_block)
+        blocks.append(title_block)
 
         if ci_title:
             ci_title_block = {"type": "section", "text": {"type": "mrkdwn", "text": ci_title}}
