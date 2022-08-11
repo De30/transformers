@@ -113,7 +113,7 @@ jobs:
     steps:
       - name: NVIDIA-SMI
         run: |
-          nvidia-smi
+          nvidia-smisss
 
   run_tests_single_gpu:
     name: Model tests
