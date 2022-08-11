@@ -410,20 +410,19 @@ class Message:
         else:
             text = "There was an issue running the tests."
 
-        error_block = [
-            {
-                "type": "section",
-                "text": {
-                    "type": "plain_text",
-                    "text": text,
-                },
-                "accessory": {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "Check Action results", "emoji": True},
-                    "url": f"https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}",
-                },
-            }
-        ]
+        error_block = {
+            "type": "section",
+            "text": {
+                "type": "plain_text",
+                "text": text,
+            },
+            "accessory": {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "Check Action results", "emoji": True},
+                "url": f"https://github.com/huggingface/transformers/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+            },
+        }
+
         blocks.append(error_block)
 
         payload = json.dumps(blocks)
