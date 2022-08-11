@@ -630,6 +630,11 @@ def prepare_reports(title, header, reports, to_truncate=True):
 
 if __name__ == "__main__":
 
+    setup_status = os.environ.get("SETUP_STATUS")
+    runner_status = os.environ.get("RUNNER_STATUS")
+    setup_failed = True if setup_status is not None and setup_status != "success" else False
+    runner_failed = True if runner_status is not None and runner_status != "success" else False
+
     org = "huggingface"
     repo = "transformers"
     repository_full_name = f"{org}/{repo}"
@@ -864,6 +869,6 @@ if __name__ == "__main__":
     message = Message(title, ci_title, model_results, additional_results)
 
     # send report only if there is any failure (for push CI)
-    if message.n_failures or ci_event != "push":
+    if (setup_failed or runner_failed) or message.n_failures or ci_event != "push":
         message.post()
         message.post_reply()
