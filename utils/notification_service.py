@@ -404,14 +404,14 @@ class Message:
             blocks.append(ci_title_block)
 
         if setup_failed:
-            text = "Setup job failed. Tests are not run."
+            text = "💔 Setup job failed. Tests are not run. 😭"
         elif runner_failed:
-            text = "CI runners have problems! Tests are not run."
+            text = "💔 CI runners have problems! Tests are not run. 😭"
         else:
-            text = "There was an issue running the tests."
+            text = "💔 There was an issue running the tests. 😭"
 
         error_block = {
-            "type": "section",
+            "type": "header",
             "text": {
                 "type": "plain_text",
                 "text": text,
