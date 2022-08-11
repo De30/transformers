@@ -34,6 +34,7 @@ jobs:
         # `CI_SHA_WORKFLOW_RUN`: The commit SHA that triggers this workflow by `workflow_run` event
         # `CI_SHA`: The non-empty commit SHA from the above two (one and only one of them is empty)
         run: |
+          bonnnnn
           CI_BRANCH_PUSH=${{ github.event.ref }}
           CI_BRANCH_PUSH=${CI_BRANCH_PUSH/'refs/heads/'/''}
           CI_BRANCH_WORKFLOW_RUN=${{ github.event.workflow_run.head_branch }}
