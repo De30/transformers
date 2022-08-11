@@ -718,7 +718,7 @@ if __name__ == "__main__":
         ci_title = ""
 
     if setup_failed or runner_failed:
-        Message.error_out(title, ci_title, ci_setup_failed, runner_failed)
+        Message.error_out(title, ci_title, setup_failed, runner_failed)
         exit(0)
 
     arguments = sys.argv[1:][0]
