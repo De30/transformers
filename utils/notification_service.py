@@ -98,9 +98,20 @@ def dicts_to_sum(objects: Union[Dict[str, Dict], List[dict]]):
 
 
 class Message:
-    def __init__(self, title: str, ci_title: str, model_results: Dict, additional_results: Dict):
+    def __init__(
+        self,
+        title: str,
+        ci_title: str,
+        setup_failed: bool,
+        runner_failed: bool,
+        model_results: Dict,
+        additional_results: Dict
+    ):
         self.title = title
         self.ci_title = ci_title
+
+        self.setup_failed = setup_failed
+        self.runner_failed = runner_failed
 
         # Failures and success of the modeling tests
         self.n_model_success = sum(r["success"] for r in model_results.values())
@@ -158,6 +169,14 @@ class Message:
     @property
     def header(self) -> Dict:
         return {"type": "header", "text": {"type": "plain_text", "text": self.title}}
+
+    @property
+    def setup_failure(self) -> Dict:
+        return {"type": "header", "text": {"type": "plain_text", "text": "💔 Setup job failed. Tests are not run. 😭"}}
+
+    @property
+    def runner_failure(self) -> Dict:
+        return {"type": "header", "text": {"type": "plain_text", "text": "💔 CI runners have problems! Tests are not run. 😭"}}
 
     @property
     def ci_title_section(self) -> Dict:
@@ -369,20 +388,25 @@ class Message:
         if self.ci_title:
             blocks.append(self.ci_title_section)
 
-        if self.n_model_failures > 0 or self.n_additional_failures > 0:
-            blocks.append(self.failures)
+        if self.setup_failed:
+            blocks.append(self.setup_failure)
+        elif self.runner_failed:
+            blocks.append(self.runner_failure)
+        else:
+            if self.n_model_failures > 0 or self.n_additional_failures > 0:
+                blocks.append(self.failures)
 
-        if self.n_model_failures > 0:
-            blocks.append(self.category_failures)
-            for block in self.model_failures:
-                if block["text"]["text"]:
-                    blocks.append(block)
+            if self.n_model_failures > 0:
+                blocks.append(self.category_failures)
+                for block in self.model_failures:
+                    if block["text"]["text"]:
+                        blocks.append(block)
 
-        if self.n_additional_failures > 0:
-            blocks.append(self.additional_failures)
+            if self.n_additional_failures > 0:
+                blocks.append(self.additional_failures)
 
-        if self.n_model_failures == 0 and self.n_additional_failures == 0:
-            blocks.append(self.no_failures)
+            if self.n_model_failures == 0 and self.n_additional_failures == 0:
+                blocks.append(self.no_failures)
 
         return json.dumps(blocks)
 
@@ -416,7 +440,13 @@ class Message:
         print("Sending the following payload")
         print(json.dumps({"blocks": json.loads(self.payload)}))
 
-        text = f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
+        # If blocks are included, `text` will become the fallback text used in notifications.
+        if self.setup_failed:
+            text = "Setup job failed. Tests are not run."
+        elif self.runner_failed:
+            text = "CI runners have problems! Tests are not run."
+        else:
+            text = f"{self.n_failures} failures out of {self.n_tests} tests," if self.n_failures else "All tests passed."
 
         self.thread_ts = client.chat_postMessage(
             channel=os.environ["CI_SLACK_REPORT_CHANNEL_ID"],
@@ -866,7 +896,7 @@ if __name__ == "__main__":
                             {"line": line, "trace": stacktraces.pop(0)}
                         )
 
-    message = Message(title, ci_title, model_results, additional_results)
+    message = Message(title, ci_title, setup_failed, runner_failed, model_results, additional_results)
 
     # send report only if there is any failure (for push CI)
     if (setup_failed or runner_failed) or message.n_failures or ci_event != "push":
