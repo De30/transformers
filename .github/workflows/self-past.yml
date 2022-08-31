@@ -25,6 +25,8 @@ env:
   SIGOPT_API_TOKEN: ${{ secrets.SIGOPT_API_TOKEN }}
   TF_FORCE_GPU_ALLOW_GROWTH: true
   RUN_PT_TF_CROSS_TESTS: 1
+  # Patch release: v4.21.2
+  SHA: b487096b02307cd6e0f132b676cdcc7255fe8e74
 
 jobs:
   setup:
@@ -65,7 +67,7 @@ jobs:
     steps:
       - name: Update clone
         working-directory: /transformers
-        run: git fetch && git checkout ${{ github.sha }}
+        run: git fetch && git checkout ${{ env.sha }}
 
       - name: Echo folder ${{ matrix.folders }}
         shell: bash
@@ -118,7 +120,7 @@ jobs:
     steps:
       - name: Update clone
         working-directory: /transformers
-        run: git fetch && git checkout ${{ github.sha }}
+        run: git fetch && git checkout ${{ env.sha }}
 
       - name: Echo folder ${{ matrix.folders }}
         shell: bash
