@@ -40,6 +40,9 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Update clone
+        run: git fetch && git checkout ${{ env.SHA }}
+
       - name: Cleanup
         run: |
           rm -rf tests/__pycache__
@@ -67,7 +70,7 @@ jobs:
     steps:
       - name: Update clone
         working-directory: /transformers
-        run: git fetch && git checkout ${{ env.sha }}
+        run: git fetch && git checkout ${{ env.SHA }}
 
       - name: Echo folder ${{ matrix.folders }}
         shell: bash
@@ -120,7 +123,7 @@ jobs:
     steps:
       - name: Update clone
         working-directory: /transformers
-        run: git fetch && git checkout ${{ env.sha }}
+        run: git fetch && git checkout ${{ env.SHA }}
 
       - name: Echo folder ${{ matrix.folders }}
         shell: bash
