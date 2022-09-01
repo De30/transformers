@@ -6,25 +6,25 @@ on:
       - run-past-ci*
 
 jobs:
-  run_past_ci_pytorch_1-11:
-    name: PyTorch 1.11
-    if: always()
-    uses: ./.github/workflows/self-past.yml
-    with:
-      framework: pytorch
-      version: "1.11"
-    secrets: inherit
-#
-#  run_past_ci_pytorch_1-10:
-#    name: PyTorch 1.10
+#  run_past_ci_pytorch_1-11:
+#    name: PyTorch 1.11
 #    if: always()
-#    needs: [run_past_ci_pytorch_1-11]
 #    uses: ./.github/workflows/self-past.yml
 #    with:
 #      framework: pytorch
-#      version: "1.10"
+#      version: "1.11"
 #    secrets: inherit
 #
+  run_past_ci_pytorch_1-10:
+    name: PyTorch 1.10
+    if: always()
+    # needs: [run_past_ci_pytorch_1-11]
+    uses: ./.github/workflows/self-past.yml
+    with:
+      framework: pytorch
+      version: "1.10"
+    secrets: inherit
+
 #  run_past_ci_pytorch_1-9:
 #    name: PyTorch 1.9
 #    if: always()
