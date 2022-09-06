@@ -18,5 +18,5 @@ jobs:
           CI_SLACK_BOT_TOKEN: ${{ secrets.CI_SLACK_BOT_TOKEN }}
           CI_SLACK_REPORT_CHANNEL_ID: ${{ secrets.CI_SLACK_CHANNEL_DUMMY_TESTS }}
         run: |
-          pip install slack_sdk==3.18.2
+          pip install slack_sdk==3.18.3
           python utils/notification_service.py
